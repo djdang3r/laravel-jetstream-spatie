@@ -10,7 +10,7 @@ class CustomPermission extends SpatiePermission
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'modules_id', 'guard_name'];
+    protected $fillable = ['name', 'modules_id', 'guard_name', 'description'];
 
     public function module()
     {

@@ -95,30 +95,30 @@
 
 
 
-  @php
-    $heads = [
-        'ID',
-        'Name',
-        ['label' => 'Email', 'width' => 40],
-        'Roles',
-        ['label' => 'Actions', 'no-export' => true, 'width' => 15],
-    ];
+    @php
+        $heads = [
+            'ID',
+            'Name',
+            ['label' => 'Email', 'width' => 40],
+            'Roles',
+            ['label' => 'Actions', 'no-export' => true, 'width' => 15],
+        ];
 
-    $btnEdit = '<button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
-                    <i class="fa fa-lg fa-fw fa-pen"></i>
-                </button>';
-    $btnDelete = '<button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
-                      <i class="fa fa-lg fa-fw fa-trash"></i>
-                  </button>';
-    $btnDetails = '<button class="btn btn-xs btn-default text-teal mx-1 shadow" title="Details">
-                      <i class="fa fa-lg fa-fw fa-eye"></i>
-                  </button>';
+        $btnEdit = '<button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Edit">
+                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                    </button>';
+        $btnDelete = '<button class="btn btn-xs btn-default text-danger mx-1 shadow" title="Delete">
+                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                    </button>';
+        $btnDetails = '<button class="btn btn-xs btn-default text-teal mx-1 shadow" title="Details">
+                        <i class="fa fa-lg fa-fw fa-eye"></i>
+                    </button>';
 
-    $config = [
-        'data' => $data,
-        'order' => [[1, 'asc']],
-        'columns' => [null, null, null, ['orderable' => false]],
-    ];
+        $config = [
+            'data' => $data,
+            'order' => [[1, 'asc']],
+            'columns' => [null, null, null, ['orderable' => false]],
+        ];
     @endphp
 
     {{-- Minimal example / fill data using the component slot --}}

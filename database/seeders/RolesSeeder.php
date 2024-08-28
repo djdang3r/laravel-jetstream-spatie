@@ -15,9 +15,9 @@ class RolesSeeder extends Seeder
     public function run(): void
     {
         //
-        $role_root = Role::create(['name' => 'root']);
-        $role_admin = Role::create(['name' => 'admin']);
-        $role_standard = Role::create(['name' => 'standard']);
+        $role_root = Role::create(['name' => 'root', 'description' => 'Este rol es exclusivo para el manejo y administracion del sistemadesde su codigo fuente. Las acciones realizadas desde con este rol son criticas para el funcionamiento del sistema. Se debe tener mucho cuidado con la asignacion de este rol a los usuarios.']);
+        $role_admin = Role::create(['name' => 'admin', 'description' => 'Este rol solo para administrar los recurtsos del sistema, gestionar registros. Las acciones realizadas desde este rol son criticas y por tal motivo se debe tomar a discrecion.']);
+        $role_standard = Role::create(['name' => 'standard', 'description' => 'Este rol tiene privilegios completamente restringidos o de muy bajo nivel, solo es usado por usuarios de bajo nivel para poder realizar acciones de tema menor o visualizar informacion ']);
 
         $generalsystem = Module::create(['name' => 'general system']);
 
