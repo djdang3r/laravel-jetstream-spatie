@@ -66,7 +66,7 @@
                             <ul class="nav nav-pills">
                                 <li class="nav-item"><a class="nav-link active" href="#permissions"
                                         data-toggle="tab">Permissions</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a>
+                                <li class="nav-item"><a class="nav-link" href="#profile-accions" data-toggle="tab">Profile Actions</a>
                                 </li>
                                 <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a>
                                 </li>
@@ -110,93 +110,53 @@
                                     </div>
                                 </div>
 
-                                <div class="tab-pane" id="timeline">
+                                <div class="tab-pane" id="profile-accions">
 
-                                    <div class="timeline timeline-inverse">
-
-                                        <div class="time-label">
-                                            <span class="bg-danger">
-                                                10 Feb. 2014
-                                            </span>
-                                        </div>
-
-
+                                    <x-app-layout>
+                                        <x-slot name="header">
+                                            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                                                {{ __('Profile') }}
+                                            </h2>
+                                        </x-slot>
+                                
                                         <div>
-                                            <i class="fas fa-envelope bg-primary"></i>
-                                            <div class="timeline-item">
-                                                <span class="time"><i class="far fa-clock"></i> 12:05</span>
-                                                <h3 class="timeline-header"><a href="#">Support Team</a> sent
-                                                    you an email</h3>
-                                                <div class="timeline-body">
-                                                    Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                                                    weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                                                    jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                                                    quora plaxo ideeli hulu weebly balihoo...
+                                            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+                                                @if (Laravel\Fortify\Features::canUpdateProfileInformation())
+                                                    @livewire('profile.update-profile-information-form')
+                                
+                                                    <x-section-border />
+                                                @endif
+                                
+                                                @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
+                                                    <div class="mt-10 sm:mt-0">
+                                                        @livewire('profile.update-password-form')
+                                                    </div>
+                                
+                                                    <x-section-border />
+                                                @endif
+                                
+                                                @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
+                                                    <div class="mt-10 sm:mt-0">
+                                                        @livewire('profile.two-factor-authentication-form')
+                                                    </div>
+                                
+                                                    <x-section-border />
+                                                @endif
+                                
+                                                <div class="mt-10 sm:mt-0">
+                                                    @livewire('profile.logout-other-browser-sessions-form')
                                                 </div>
-                                                <div class="timeline-footer">
-                                                    <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                                                    <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                                                </div>
+                                
+                                                @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
+                                                    <x-section-border />
+                                
+                                                    <div class="mt-10 sm:mt-0">
+                                                        @livewire('profile.delete-user-form')
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
-
-
-                                        <div>
-                                            <i class="fas fa-user bg-info"></i>
-                                            <div class="timeline-item">
-                                                <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-                                                <h3 class="timeline-header border-0"><a href="#">Sarah Young</a>
-                                                    accepted your friend request
-                                                </h3>
-                                            </div>
-                                        </div>
-
-
-                                        <div>
-                                            <i class="fas fa-comments bg-warning"></i>
-                                            <div class="timeline-item">
-                                                <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-                                                <h3 class="timeline-header"><a href="#">Jay White</a> commented
-                                                    on your post</h3>
-                                                <div class="timeline-body">
-                                                    Take me to your leader!
-                                                    Switzerland is small and neutral!
-                                                    We are more like Germany, ambitious and misunderstood!
-                                                </div>
-                                                <div class="timeline-footer">
-                                                    <a href="#" class="btn btn-warning btn-flat btn-sm">View
-                                                        comment</a>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="time-label">
-                                            <span class="bg-success">
-                                                3 Jan. 2014
-                                            </span>
-                                        </div>
-
-
-                                        <div>
-                                            <i class="fas fa-camera bg-purple"></i>
-                                            <div class="timeline-item">
-                                                <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-                                                <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded
-                                                    new photos</h3>
-                                                <div class="timeline-body">
-                                                    <img src="https://placehold.it/150x100" alt="...">
-                                                    <img src="https://placehold.it/150x100" alt="...">
-                                                    <img src="https://placehold.it/150x100" alt="...">
-                                                    <img src="https://placehold.it/150x100" alt="...">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <i class="far fa-clock bg-gray"></i>
-                                        </div>
-                                    </div>
+                                    </x-app-layout>
                                 </div>
 
                                 <div class="tab-pane" id="settings">

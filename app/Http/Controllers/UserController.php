@@ -6,6 +6,7 @@ use App\Models\Module;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -45,8 +46,9 @@ class UserController extends Controller
         return view('users.index', compact('users','total_users', 'new_users', 'deleted_users', 'data'));
     }
 
-    public function profile($user_id) {
-        $user = User::findOrFail($user_id);
+    public function profile() {
+        $userId = Auth::id();
+        $user = User::findOrFail($userId);
         $modules = Module::with('permissions')->get();
         $canEditPermissions = $user->hasPermissionTo('create user');
         $userPermissions = $user->getAllPermissions();
