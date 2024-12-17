@@ -327,6 +327,17 @@ return [
             'url' => 'roles',
             'icon' => 'far fa-fw fa-file',
         ],
+        ['header' => 'Whatsapp API CLoud'],
+        [
+            'text' => '- Templates',
+            'url' => 'templates',
+            'icon' => '',
+        ],
+        [
+            'text' => '- Whatsapp Chat',
+            'url' => 'whatsapp_chat',
+            'icon' => '',
+        ],
         ['header' => 'account_settings'],
         [
             'text' => 'profile',

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WhatsappChatController;
+use App\Http\Controllers\WhatsappAPICLoudController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,4 +28,11 @@ Route::middleware([
     Route::get('/roles', [RoleController::class, 'index']);
     Route::get('/roles/{role}', [RoleController::class, 'roleDetail']);
     Route::post('/roles/{role}/update-permission', [RoleController::class, 'updateRolePermission'])->name('roles.update-permission')->middleware('can:give permission');
+
+    // Templates
+    Route::get('/templates', [WhatsappAPICLoudController::class, 'templatesList'])->name('templates.list');
+    //Route::get('/templates/{template}', [WhatsappAPICLoudController::class, 'templateDetail'])->name('templates.detail');
+
+    // Whatsapp Chat
+    Route::get('/whatsapp_chat', [WhatsappChatController::class, 'whatsappIndex'])->name('whatsapp.index');
 });
