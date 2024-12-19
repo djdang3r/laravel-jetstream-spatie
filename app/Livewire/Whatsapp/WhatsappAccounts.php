@@ -24,7 +24,7 @@ class WhatsappAccounts extends Component
         foreach ($this->accounts as $account) {
             $controller = new WhatsappAPICLoudController();
             $response = $controller->getPhoneNumbers($account->whatsapp_business_id);
-            dd($response);
+
             // dd($account->phoneNumbers[0]->businessProfile);
 
             if ($response->status() == 200) {

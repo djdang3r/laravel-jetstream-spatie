@@ -25,7 +25,6 @@ class WhatsappAPICLoudController extends Controller
 
     public function getPhoneNumbers($whatsapp_business_id)
     {
-        // Obtener el api_token de la base de datos
         $account = WhatsappBusinessAccount::find($whatsapp_business_id);
 
         if (!$account) {
@@ -46,36 +45,73 @@ class WhatsappAPICLoudController extends Controller
             foreach ($phoneNumbers as $phoneNumber) {
                 $cleanedPhoneNumber = preg_replace('/\D/', '', $phoneNumber['display_phone_number']);
 
+                // Buscar si el número de teléfono ya existe
+                $phoneNumberRecord = WhatsappPhoneNumber::where('phone_number_id', $phoneNumber['id'])->first();
+
                 // Obtener el perfil del número de teléfono
                 $profileData = $this->fetchPhoneNumberProfile($api_token, $phoneNumber['id']);
+                $profileData = $profileData['data'][0];
 
-                $profileRecord = WhatsappBusinessProfile::updateOrCreate(
-                    ['whatsapp_business_profile_id' => $phoneNumber['id']],
-                    [
+                if ($phoneNumberRecord) {
+                    // Actualizar el número de teléfono existente
+                    $phoneNumberRecord->update([
+                        // 'whatsapp_business_accounts_id' => $whatsapp_business_id,
+                        'display_phone_number' => $cleanedPhoneNumber,
+                        'verified_name' => $phoneNumber['verified_name'],
+                        // 'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
+                        // 'code_verification_status' => $phoneNumber['code_verification_status'],
+                        // 'quality_rating' => $phoneNumber['quality_rating'],
+                        // 'platform_type' => $phoneNumber['platform_type'],
+                        // 'throughput_level' => $phoneNumber['throughput']['level'],
+                        // 'webhook_configuration' => $phoneNumber['webhook_configuration']['application'] ?? null,
+                    ]);
+
+                    // Buscar si el perfil ya existe
+                    if($phoneNumberRecord->whatsapp_bussines_profile_id){
+                        $profileRecord = WhatsappBusinessProfile::where('whatsapp_business_profile_id', $phoneNumberRecord->whatsapp_bussines_profile_id)->first();
+
+                        // Actualizar el perfil existente
+                        $profileRecord->update([
+                            'about' => $profileData['about'] ?? null,
+                            'address' => $profileData['address'] ?? null,
+                            'description' => $profileData['description'] ?? null,
+                            'email' => $profileData['email'] ?? null,
+                            'profile_picture_url' => $profileData['profile_picture_url'] ?? null,
+                            'vertical' => $profileData['vertical'] ?? null,
+                            'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
+                        ]);
+                    } 
+                } else {
+                    // Crear un nuevo número de teléfono
+                    $phoneNumberRecord = WhatsappPhoneNumber::create([
+                        'phone_number_id' => $phoneNumber['id'],
+                        'whatsapp_business_accounts_id' => $whatsapp_business_id,
+                        'display_phone_number' => $cleanedPhoneNumber,
+                        'verified_name' => $phoneNumber['verified_name'],
+                        // 'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
+                        // 'code_verification_status' => $phoneNumber['code_verification_status'],
+                        // 'quality_rating' => $phoneNumber['quality_rating'],
+                        // 'platform_type' => $phoneNumber['platform_type'],
+                        // 'throughput_level' => $phoneNumber['throughput']['level'],
+                        // 'webhook_configuration' => $phoneNumber['webhook_configuration']['application'] ?? null,
+                    ]);
+
+                    // Crear un nuevo perfil
+                    $profileRecord = WhatsappBusinessProfile::create([
+                        'whatsapp_business_profile_id' => $phoneNumber['id'],
                         'about' => $profileData['about'] ?? null,
                         'address' => $profileData['address'] ?? null,
                         'description' => $profileData['description'] ?? null,
                         'email' => $profileData['email'] ?? null,
                         'profile_picture_url' => $profileData['profile_picture_url'] ?? null,
                         'vertical' => $profileData['vertical'] ?? null,
-                        'messaging_product' => $profileData['messaging_product'] ?? null,
-                    ]
-                );
+                        'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
+                    ]);
 
-                $phoneNumberRecord = WhatsappPhoneNumber::updateOrCreate(
-                    ['phone_number_id' => $phoneNumber['id']],
-                    [
-                        'whatsapp_business_accounts_id' => $whatsapp_business_id,
-                        'display_phone_number' => $cleanedPhoneNumber,
-                        'verified_name' => $phoneNumber['verified_name'],
+                    $phoneNumberRecord->update([
                         'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
-                        // 'code_verification_status' => $phoneNumber['code_verification_status'],
-                        // 'quality_rating' => $phoneNumber['quality_rating'],
-                        // 'platform_type' => $phoneNumber['platform_type'],
-                        // 'throughput_level' => $phoneNumber['throughput']['level'],
-                        // 'webhook_configuration' => $phoneNumber['webhook_configuration']['application'] ?? null,
-                    ]
-                );
+                    ]);
+                }
 
                 // Guardar los sitios web
                 if (isset($profileData['websites'])) {
@@ -107,13 +143,14 @@ class WhatsappAPICLoudController extends Controller
 
     private function fetchPhoneNumbers($api_token, $whatsapp_business_id)
     {
-        $api_url = "https://graph.facebook.com/";
-        $api_version = "21.0";
-        $url = "{$api_url}{$api_version}/{$whatsapp_business_id}/phone_numbers";
+        $api_url = rtrim(env('WHATSAPP_API_URL'), '/');
+        $api_version = env('WHATSAPP_API_VERSION');
+        $url = "{$api_url}/{$api_version}/{$whatsapp_business_id}/phone_numbers";
+
         Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
-
+        // dd($response->json()['data']);
         if ($response->successful()) {
             return $response->json()['data'];
         } else {
@@ -123,16 +160,14 @@ class WhatsappAPICLoudController extends Controller
 
     private function fetchPhoneNumberProfile($api_token, $phone_number_id)
     {
-        // $api_url = env('WHATSAPP_API_URL');
-        // $api_version = env('WHATSAPP_API_VERSION');
-        $api_url = "https://graph.facebook.com/";
-        $api_version = "21.0";
-        $api_token = "EAAKt6D2DgZCMBO59rFHbFg17VnSpoWq8uragjFda4w4dPDuZALV1uO2MmU0zRQa1DtcbBUzvp4UohZCrLBuKrdqMdXNzRqio0MuSxZABFUZBbWFUztmMHLYd0l94Iq4C0AfmrThVNLbZCxVFcjmiiUn2c6ZBaNphphqtZA1tzyJxGj0Khsy9d0cKpYFMoRRbMrqZCbAZDZD";
+        $api_url = env('WHATSAPP_API_URL');
+        $api_version = env('WHATSAPP_API_VERSION');
+
         $url = "{$api_url}{$api_version}/{$phone_number_id}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical";
         Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
-
+        // dd($response->json()['data']);
         if ($response->successful()) {
             return $response->json();
         } else {
