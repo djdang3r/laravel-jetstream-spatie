@@ -101,6 +101,7 @@ class WhatsappWebhookController extends Controller
                             'message_to' => $metadata['phone_number_id'],
                             'message_type' => $type_message,
                             'message_content' => $mensaje,
+                            'delivered_at' => now(),
                             'json_content' => json_encode($messages),
                         ]);
 

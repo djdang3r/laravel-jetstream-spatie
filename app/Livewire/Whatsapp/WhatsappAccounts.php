@@ -38,10 +38,7 @@ class WhatsappAccounts extends Component
         $phone_profile = WhatsappBusinessProfile::find($profile["whatsapp_business_profile_id"]);
         $this->selectedProfile = $phone_profile;
 
-        // Cargar las conversaciones asociadas al número de teléfono seleccionado
-        $conversations = $phone_profile->phoneNumber->messages->groupBy('message_from'); 
-
-        $this->dispatch("conversations-list");
+        $this->dispatch("conversations-list", $phone_profile->whatsapp_business_profile_id);
     }
 
     public function render()

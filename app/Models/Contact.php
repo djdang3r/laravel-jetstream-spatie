@@ -43,4 +43,14 @@ class Contact extends Model
     {
         return $this->hasMany(Message::class, 'contact_id');
     }
+
+    public function latestMessage()
+    {
+        return $this->hasOne(Message::class, 'contact_id')->orderBy('created_at', 'desc');
+    }
+
+    public function unreadMessagesCountByContact()
+    {
+        return $this->messages()->whereNull('readed_at')->count();
+    }
 }

@@ -17,8 +17,9 @@
         </div>
         <!-- /.card-header -->
         <div class="card-body">
-            @include('livewire.chat.chat-box')
-            @include('livewire.chat.chat-list')
+            @livewire('chat.chat-box')
+            @livewire('chat.chat-list')
+            
         </div>
         <!-- /.card-body -->
         <div class="card-footer">
