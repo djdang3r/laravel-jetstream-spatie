@@ -8,7 +8,7 @@
         @if ($conversations_contacts)
             @foreach ($conversations_contacts as $contact)
                 <li>
-                    <a href="#">
+                    <a href="#"  wire:click.prevent="selectContact({{ json_encode($contact) }})">
                         <img class="contacts-list-img" src="https://adminlte.io/docs/3.1//assets/img/user1-128x128.jpg">
                         <div class="contacts-list-info">
                             <span class="contacts-list-name">

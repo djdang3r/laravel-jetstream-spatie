@@ -19,18 +19,21 @@ class ChatList extends Component
     #[On('conversations-list')]
     public function loadConversations($phone_profile_id)
     {
+        $this->phone_profile_id = $phone_profile_id;
         $this->conversations_contacts = [];
-
         $phone_profile = WhatsappBusinessProfile::find($phone_profile_id);
-
-        // Cargar las conversaciones asociadas al número de teléfono seleccionado
-        $conversations = $phone_profile->phoneNumber->messages->groupBy('message_from');
+        $conversations = $phone_profile->phoneNumber->messages->where('message_method', 'INPUT')->groupBy('message_from');
 
         $contacts = $conversations->map(function ($messages) {
             return $messages->first()->contact;
         });
         
         $this->conversations_contacts = $contacts;
+    }
+
+    public function selectContact($contact)
+    {
+        $this->dispatch("view-messages", $contact, $this->phone_profile_id);
     }
 
     public function render()

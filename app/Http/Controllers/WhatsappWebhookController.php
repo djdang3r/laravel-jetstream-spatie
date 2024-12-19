@@ -98,7 +98,7 @@ class WhatsappWebhookController extends Controller
                             'conversation_id' => $conversation->conversation_id,
                             'messaging_product' => $value['messaging_product'],
                             'message_from' => $celular,
-                            'message_to' => $metadata['phone_number_id'],
+                            'message_to' => $whatsapp_phone->display_phone_number,
                             'message_type' => $type_message,
                             'message_content' => $mensaje,
                             'delivered_at' => now(),

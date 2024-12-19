@@ -1,6 +1,6 @@
 <div>
     <!-- Aquí puedes agregar el contenido del chat -->
-    <div class="card card-success direct-chat direct-chat-success">
+    <div class="card card-success direct-chat direct-chat-success direct-chat-contacts-open">
         <div class="card-header">
             <h3 class="card-title">Direct Chat</h3>
             <div class="card-tools">
@@ -19,21 +19,9 @@
         <div class="card-body">
             @livewire('chat.chat-box')
             @livewire('chat.chat-list')
-            
         </div>
         <!-- /.card-body -->
-        <div class="card-footer">
-            <form action="#" method="post">
-                @csrf
-                <div class="input-group">
-                    <input type="text" name="message" placeholder="Type Message ..." class="form-control">
-                    <span class="input-group-append">
-                        <button type="button" class="btn btn-primary">Send</button>
-                    </span>
-                </div>
-            </form>
-        </div>
-        <!-- /.card-footer-->
+        
     </div>
     
 </div>

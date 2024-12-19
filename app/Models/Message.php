@@ -20,6 +20,7 @@ class Message extends Model
         'contact_id',
         'conversation_id',
         'messaging_product',
+        'message_method',
         'message_from',
         'message_to',
         'message_type',
