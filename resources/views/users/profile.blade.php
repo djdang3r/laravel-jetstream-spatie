@@ -52,7 +52,6 @@
             </div>
         </div>
     </x-app-layout>
-
 @stop
 
 @section('css')

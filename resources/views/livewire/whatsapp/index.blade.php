@@ -1,117 +1,19 @@
-@extends('adminlte::page')
-
-@section('title', 'Whatsapp Chat')
-
-@section('content_header')
-    <h1>Whatsapp Chat</h1>
-@stop
-
-@section('content')
-    <!-- Main content -->
+<div>
     <section class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-3">
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Phone Numbers List</h3>
-                        </div>
-                        <div class="card-body box-profile">
-                            <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg"
-                                    alt="user image">
-                                <span class="username">
-                                    <a href="#">Script Soport</a><!-- verified_name -->
-                                </span>
-                                <span class="description">57 323 4262686</span>
-                                <span class="description">Phone number ID: 194112953793281</span>
-                            </div>
-                        </div>
-
-                        <div class="card-body box-profile">
-                            <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg"
-                                    alt="user image">
-                                <span class="username">
-                                    <a href="#">Gogoo Soporte</a><!-- verified_name -->
-                                </span>
-                                <span class="description">57 314 5055047</span>
-                                <span class="description">Phone number ID: 1085687916275343</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Information</h3>
-                        </div>
-                        <div class="card-body box-profile">
-                            <div class="text-center">
-                                <img class="profile-user-img img-fluid img-circle"
-                                    src="https://adminlte.io/themes/v3/dist/img/user4-128x128.jpg"
-                                    alt="User profile picture">
-                            </div>
-
-                            <h3 class="profile-username text-center">Script Develop</h3>
-
-                            <p class="text-muted text-center">57 323 4262686</p>
-
-                            <strong><i class="fas fa-book mr-1"></i> Phone number ID</strong>
-                            <p class="text-muted">
-                                194112953793281
-                            </p>
-
-                            <strong><i class="fas fa-book mr-1"></i> Address</strong>
-                            <p class="text-muted">
-                                Santa Rosa de Cabal, Terrazas de Monserrate.
-                            </p>
-
-                            <strong><i class="fas fa-book mr-1"></i> Email</strong>
-                            <p class="text-muted">
-                                info@scriptdevelop.com.co
-                            </p>
-
-                            <strong><i class="fas fa-book mr-1"></i> Web sites</strong>
-                            <ul class="text-muted">
-                                <li>
-                                    <a href="https://www.scriptdevelop.com.co" target="_blank">www.scriptdevelop.com.co</a>
-                                </li>
-                                <li>
-                                    <a href="https://www.scriptdevelop.com" target="_blank">www.scriptdevelop.com</a>
-                                </li>
-                            </ul>
-
-                            <strong><i class="fas fa-book mr-1"></i> Description</strong>
-                            <p class="text-muted">
-                                Servicios
-                            </p>
-
-
-                            {{-- <ul class="list-group list-group-unbordered mb-3">
-                                <li class="list-group-item">
-                                    <b>Followers</b> <a class="float-right">1,322</a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Following</b> <a class="float-right">543</a>
-                                </li>
-                                <li class="list-group-item">
-                                    <b>Friends</b> <a class="float-right">13,287</a>
-                                </li>
-                            </ul> --}}
-
-                            {{-- <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a> --}}
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
-
+                    @livewire('whatsapp.whatsapp-accounts')
                 </div>
 
                 <div class="col-md-9">
                     <div class="card">
                         <div class="card-header p-2">
                             <ul class="nav nav-pills">
-                                <li class="nav-item"><a class="nav-link active" href="#chats" data-toggle="tab">Chats</a>
-                                </li>
+                                <li class="nav-item"><a class="nav-link active" href="#chats"
+                                    data-toggle="tab">Whatsapp Chats</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#templates"
+                                        data-toggle="tab">Templates</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#update-account" data-toggle="tab">Update
                                         Account</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a>
@@ -176,6 +78,59 @@
                                     </div>
                                 </div>
 
+                                <div class="tab-pane" id="templates">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Template Manager</h3>
+
+                                            <div class="card-tools">
+                                                <ul class="pagination pagination-sm float-right">
+                                                    <li class="page-item"><a class="page-link" href="#">«</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">»</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <div class="card-body p-0">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 10px">#</th>
+                                                        <th>Template name</th>
+                                                        <th>Category</th>
+                                                        <th>Languaje</th>
+                                                        <th>Last Updated</th>
+                                                        <th>Messages</th>
+                                                        <th style="width: 40px">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>1.</td>
+                                                        <td>hello_world</td>
+                                                        <td>Utilizad</td>
+                                                        <td>English (US)</td>
+                                                        <td>
+                                                            <div class="sparkbar" data-color="#00a65a" data-height="20">
+                                                                2021-09-01
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress progress-xs">
+                                                                <div class="progress-bar progress-bar-danger"
+                                                                    style="width: 55%"></div>
+                                                            </div>
+                                                        </td>
+                                                        <td><span class="badge bg-danger">55%</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- /.card-body -->
+                                    </div>
+                                </div>
+
                                 <div class="tab-pane" id="update-account">
 
                                 </div>
@@ -190,14 +145,4 @@
             </div>
         </div>
     </section>
-    <!-- /.content -->
-@stop
-
-@section('css')
-    {{-- Add here extra stylesheets --}}
-    {{-- <link rel="stylesheet" href="/css/admin_custom.css"> --}}
-@stop
-
-@section('js')
-    <script></script>
-@stop
+</div>

@@ -3,8 +3,16 @@
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsappChatController;
+use App\Http\Controllers\WhatsappWebhookController;
 use App\Http\Controllers\WhatsappAPICLoudController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Route;
+
+Route::post('/webhook', [WhatsappWebhookController::class, 'handle']);
+Route::get('/webhook', [WhatsappWebhookController::class, 'handle']);
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +36,9 @@ Route::middleware([
     Route::get('/roles', [RoleController::class, 'index']);
     Route::get('/roles/{role}', [RoleController::class, 'roleDetail']);
     Route::post('/roles/{role}/update-permission', [RoleController::class, 'updateRolePermission'])->name('roles.update-permission')->middleware('can:give permission');
+
+    // Whatsapp management
+    Route::get('/whatsapp_manager', [WhatsappAPICLoudController::class, 'whatsappManager'])->name('whatsapp.manager');
 
     // Templates
     Route::get('/templates', [WhatsappAPICLoudController::class, 'templatesList'])->name('templates.list');

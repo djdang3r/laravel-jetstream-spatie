@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Whatsapp templates')
+@section('title', 'Whatsapp API Cloud Manager')
 
 @section('content_header')
-    <h1>Whatsapp Templates</h1>
+    <h1>Whatsapp API Cloud Manager</h1>
 @stop
 
 @section('content')
     <!-- Main content -->
-
+    @livewire('whatsapp.index')
     <!-- /.content -->
 @stop
 
@@ -18,7 +18,5 @@
 @stop
 
 @section('js')
-    <script>
-
-    </script>
+    <script></script>
 @stop

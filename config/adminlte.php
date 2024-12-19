@@ -329,8 +329,8 @@ return [
         ],
         ['header' => 'Whatsapp API CLoud'],
         [
-            'text' => '- Templates',
-            'url' => 'templates',
+            'text' => '- Whatsapp Manager',
+            'url' => 'whatsapp_manager',
             'icon' => '',
         ],
         [
