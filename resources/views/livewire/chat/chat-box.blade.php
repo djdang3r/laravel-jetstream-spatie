@@ -17,7 +17,48 @@
                     <img class="direct-chat-img" src="{{ $isOutput ? 'https://adminlte.io/docs/3.1//assets/img/user3-128x128.jpg' : 'https://adminlte.io/docs/3.1//assets/img/user1-128x128.jpg' }}" alt="message user image">
                     <!-- /.direct-chat-img -->
                     <div class="direct-chat-text">
-                        {{ $message->message_content }}
+                        @if ($message->message_type === 'TEXT')
+                            {{ $message->message_content }}
+                        @elseif ($message->message_type === 'AUDIO')
+                            @foreach ($message->mediaFiles as $file)
+                                <audio controls>
+                                    <source src="{{ Storage::url($file->url) }}" type="audio/ogg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            @endforeach
+                        @elseif ($message->message_type === 'IMAGE')
+                            @foreach ($message->mediaFiles as $file)
+                            <ul class="mailbox-attachments d-flex align-items-stretch clearfix">
+                                <li>
+                                  <span class="mailbox-attachment-icon has-img"><img src="{{ Storage::url($file->url) }}" alt="Image" class="img-fluid"></span>
+                                  <div class="mailbox-attachment-info">
+                                    <a href="#" class="mailbox-attachment-name"><i class="fas fa-camera"></i> photo2.png</a>
+                                        <span class="mailbox-attachment-size clearfix mt-1">
+                                          <span>1.9 MB</span>
+                                          <a href="#" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
+                                        </span>
+                                  </div>
+                                </li>
+                              </ul>
+                            @endforeach
+                        @elseif ($message->message_type === 'DOCUMENT')
+                            @foreach ($message->mediaFiles as $file)
+                                <ul class="mailbox-attachments d-flex align-items-stretch clearfix">
+                                    <li>
+                                        <span class="mailbox-attachment-icon"><i class="far fa-file-pdf"></i></span>
+                    
+                                        <div class="mailbox-attachment-info">
+                                            <a href="{{ Storage::url($file->url) }}" class="mailbox-attachment-name" target="_blank"><i class="fas fa-paperclip"></i> {{ $file->file_name }}</a>
+                                            <span class="mailbox-attachment-size clearfix mt-1">
+                                                <span>1,245 KB</span>
+                                                <a href="#" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            @endforeach
+                        @endif
+                        
                         @if ($isOutput)
                             <span class="float-right">
                                 <sub>{{ $message->created_at->format('d M h:i a') }}
