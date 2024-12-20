@@ -32,7 +32,7 @@
                                 <li>
                                   <span class="mailbox-attachment-icon has-img"><img src="{{ Storage::url($file->url) }}" alt="Image" class="img-fluid"></span>
                                   <div class="mailbox-attachment-info">
-                                    <a href="#" class="mailbox-attachment-name"><i class="fas fa-camera"></i> photo2.png</a>
+                                    <a href="#" class="mailbox-attachment-name"><i class="fas fa-camera"></i> {{ $message->caption }}</a>
                                         <span class="mailbox-attachment-size clearfix mt-1">
                                           <span>1.9 MB</span>
                                           <a href="#" class="btn btn-default btn-sm float-right"><i class="fas fa-cloud-download-alt"></i></a>

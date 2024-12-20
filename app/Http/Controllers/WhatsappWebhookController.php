@@ -102,7 +102,6 @@ class WhatsappWebhookController extends Controller
                             'message_to' => $whatsapp_phone->display_phone_number,
                             'message_type' => $type_message,
                             'message_content' => $mensaje,
-                            'delivered_at' => now(),
                             'json_content' => json_encode($messages),
                         ]);
 
@@ -114,16 +113,19 @@ class WhatsappWebhookController extends Controller
                 // Procesa el mensaje de audio
                 elseif ($tipoMensaje === 'audio') {
                     $type_message = strtoupper($tipoMensaje);
+                    $caption = $messages['audio']['caption'] ?? 'AUDIO';
 
                     $message = Message::create([
                         'whatsapp_phone_id' => $whatsapp_phone->whatsapp_phone_id,
                         'contact_id' => $contact->contact_id,
+                        'wa_id' => $messages['id'],
                         'conversation_id' => $conversation->conversation_id,
                         'messaging_product' => $value['messaging_product'],
                         'message_from' => $celular,
                         'message_to' => $metadata['phone_number_id'],
                         'message_type' => $type_message,
-                        'message_content' => 'AUDIO',
+                        'message_content' => $caption,
+                        'caption' => $messages['audio']['caption'] ?? $caption ?? null,
                         'json_content' => json_encode($messages),
                     ]);
 
@@ -152,6 +154,9 @@ class WhatsappWebhookController extends Controller
                             $filePath = $directory . $audioId . '.ogg';
                             file_put_contents($filePath, $audioContent);
 
+                            // Obtiene la ruta del storage link correspondiente
+                            $filePath = Storage::url('public/whatsapp/audios/' . $audioId . '.ogg');
+
                             // Inserta los datos en la base de datos
                             MediaFile::create([
                                 'message_id' => $message->message_id,
@@ -175,16 +180,19 @@ class WhatsappWebhookController extends Controller
                 // Procesa el mensaje de imagen
                 elseif ($tipoMensaje === 'image') {
                     $type_message = strtoupper($tipoMensaje);
+                    $caption = $messages['image']['caption'] ?? 'IMAGE';
 
                     $message = Message::create([
                         'whatsapp_phone_id' => $whatsapp_phone->whatsapp_phone_id,
                         'contact_id' => $contact->contact_id,
+                        'wa_id' => $messages['id'],
                         'conversation_id' => $conversation->conversation_id,
                         'messaging_product' => $value['messaging_product'],
                         'message_from' => $celular,
                         'message_to' => $metadata['phone_number_id'],
                         'message_type' => $type_message,
-                        'message_content' => 'IMAGE',
+                        'message_content' => $caption,
+                        'caption' => $messages['image']['caption'] ?? $caption ?? null,
                         'json_content' => json_encode($messages),
                     ]);
 
@@ -193,14 +201,20 @@ class WhatsappWebhookController extends Controller
 
                     // Extrae el ID de la imagen
                     $imageId = $messages['image']['id'];
+                    
+
                     $type_message = strtoupper($tipoMensaje);
 
                     // Obtiene la URL del archivo de imagen
                     $mediaUrl = $this->obtenerUrlDeMedia($imageId, $whatsapp_business, $whatsapp_phone);
 
+                    
+
                     if ($mediaUrl) {
                         // Realiza una petición para obtener el archivo de imagen
                         $imageContent = $this->obtenerArchivoDeMedia($mediaUrl, $whatsapp_business);
+
+                        
 
                         if ($imageContent) {
                             // Asegúrate de que la carpeta exista
@@ -210,8 +224,13 @@ class WhatsappWebhookController extends Controller
                             }
 
                             // Guarda el archivo de imagen en la carpeta deseada
-                            $filePath = $directory . $imageId . '.jpg';
-                            file_put_contents($filePath, $imageContent);
+                            $path = "public/whatsapp/images/{$imageId}.jpg";
+                            Storage::put($path, $imageContent);
+                            $filePath = Storage::url($path);
+
+                            // $filePath = $directory . $imageId . '.jpg';
+                            // file_put_contents($filePath, $imageContent);
+                            // $filePath = Storage::url('public/whatsapp/images/' . $imageId . '.jpg');
 
                             // Inserta los datos en la base de datos
                             MediaFile::create([
@@ -236,16 +255,19 @@ class WhatsappWebhookController extends Controller
                 // Procesa el mensaje de documento
                 elseif ($tipoMensaje === 'document') {
                     $type_message = strtoupper($tipoMensaje);
+                    $caption = $messages['document']['caption'] ?? 'DOCUMENT';
 
                     $message = Message::create([
                         'whatsapp_phone_id' => $whatsapp_phone->whatsapp_phone_id,
                         'contact_id' => $contact->contact_id,
+                        'wa_id' => $messages['id'],
                         'conversation_id' => $conversation->conversation_id,
                         'messaging_product' => $value['messaging_product'],
                         'message_from' => $celular,
                         'message_to' => $metadata['phone_number_id'],
                         'message_type' => $type_message,
-                        'message_content' => 'DOCUMENT',
+                        'message_content' => $caption,
+                        'caption' => $messages['document']['caption'] ?? $caption ?? null,
                         'json_content' => json_encode($messages),
                     ]);
 
@@ -273,6 +295,8 @@ class WhatsappWebhookController extends Controller
                             // Guarda el archivo de documento en la carpeta deseada
                             $filePath = $directory . $documentId . '.pdf';
                             file_put_contents($filePath, $documentContent);
+
+                            $filePath = Storage::url('public/whatsapp/images/' . $documentId . '.pdf');
 
                             // Inserta los datos en la base de datos
                             MediaFile::create([
