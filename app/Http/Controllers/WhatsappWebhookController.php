@@ -95,6 +95,7 @@ class WhatsappWebhookController extends Controller
                         $message = Message::create([
                             'whatsapp_phone_id' => $whatsapp_phone->whatsapp_phone_id,
                             'contact_id' => $contact->contact_id,
+                            'wa_id' => $messages['id'],
                             'conversation_id' => $conversation->conversation_id,
                             'messaging_product' => $value['messaging_product'],
                             'message_from' => $celular,
@@ -293,6 +294,57 @@ class WhatsappWebhookController extends Controller
                     }
                 }
                 
+            }
+
+            // Verifica que el mensaje está en el formato esperado
+            if (isset($input['entry'][0]['changes'][0]['value']['statuses'][0])) {
+                $status = $input['entry'][0]['changes'][0]['value']['statuses'][0];
+                $messageId = $status['id'];
+
+                // Verifica si la conversación existe en la respuesta
+                if (isset($status['conversation'])) {
+                    $conversationId = $status['conversation']['id'];
+
+                    // Verifica si la conversación existe y si no, la crea
+                    $conversation = Conversation::firstOrCreate(
+                        ['wa_conversation_id' => $conversationId],
+                        [
+                            'expiration_timestamp' => now()->addDays(30),
+                            'origin' => $status['conversation']['origin']['type'] ?? 'unknown',
+                            'pricing_model' => $status['pricing']['pricing_model'] ?? 'unknown',
+                            'billable' => $status['pricing']['billable'] ?? false,
+                            'category' => $status['pricing']['category'] ?? 'unknown',
+                        ]
+                    );
+
+                    // Actualiza el campo conversation_id del mensaje correspondiente
+                    $message = Message::where('wa_id', $messageId)->first();
+                    if ($message) {
+                        $message->conversation_id = $conversation->conversation_id;
+                        if ($status['status'] === 'delivered') {
+                            $message->delivered_at = now();
+                        } 
+                        $message->save();
+                    }
+                } else {
+                    // Manejar el caso donde no hay conversación en la respuesta
+                    Log::warning('No conversation data found in the status update', ['status' => $status]);
+                }
+            }
+
+            // Manejar la actualización del estado read por separado
+            if (isset($input['entry'][0]['changes'][0]['value']['statuses'][0])) {
+                $status = $input['entry'][0]['changes'][0]['value']['statuses'][0];
+                $messageId = $status['id'];
+
+                // Actualiza el campo readed_at del mensaje correspondiente
+                if ($status['status'] === 'read') {
+                    $message = Message::where('wa_id', $messageId)->first();
+                    if ($message) {
+                        $message->readed_at = now();
+                        $message->save();
+                    }
+                }
             }
 
             return response()->json(['status' => 'success'], 200);

@@ -19,6 +19,7 @@ class Message extends Model
         'whatsapp_phone_id',
         'contact_id',
         'conversation_id',
+        'wa_id',
         'messaging_product',
         'message_method',
         'message_from',

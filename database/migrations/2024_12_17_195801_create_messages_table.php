@@ -15,7 +15,8 @@ return new class extends Migration
             $table->uuid('message_id')->primary();
             $table->uuid('whatsapp_phone_id');
             $table->uuid('contact_id');
-            $table->uuid('conversation_id');
+            $table->uuid('conversation_id')->nullable();
+            $table->string('wa_id', 100);
             $table->string('messaging_product', 45);
             $table->string('message_method', 45)->default('INPUT');
             $table->string('message_from', 45);

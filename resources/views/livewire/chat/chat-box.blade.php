@@ -47,12 +47,12 @@
         @endif
     </div>
     <div class="card-footer">
-        <form action="#" method="post">
+        <form wire:submit.prevent="sendMessage">
             @csrf
             <div class="input-group">
-                <input type="text" name="message" placeholder="Type Message ..." class="form-control">
+                <input type="text" name="message" placeholder="Type Message ..." class="form-control" wire:model="messageContent">
                 <span class="input-group-append">
-                    <button type="button" class="btn btn-primary">Send</button>
+                    <button type="submit" class="btn btn-primary">Send</button>
                 </span>
             </div>
         </form>
