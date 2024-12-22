@@ -156,7 +156,7 @@ return [
     'layout_boxed' => null,
     'layout_fixed_sidebar' => null,
     'layout_fixed_navbar' => null,
-    'layout_fixed_footer' => null,
+    'layout_fixed_footer' => true,
     'layout_dark_mode' => true,
 
     /*
@@ -198,7 +198,8 @@ return [
     'classes_content' => '',
     'classes_sidebar' => 'sidebar-dark-primary elevation-4',
     'classes_sidebar_nav' => '',
-    'classes_topnav' => 'navbar-white navbar-light',
+    // 'classes_topnav' => 'navbar-white navbar-light',
+    'classes_topnav' => 'navbar-dark',
     'classes_topnav_nav' => 'navbar-expand',
     'classes_topnav_container' => 'container',
 
