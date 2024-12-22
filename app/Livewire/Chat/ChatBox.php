@@ -8,6 +8,9 @@ use App\Models\Message;
 use App\Models\WhatsappBusinessProfile;
 use App\Http\Controllers\WhatsappChatController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
+use App\Events\MessageReceived;
 
 class ChatBox extends Component
 {
@@ -40,6 +43,17 @@ class ChatBox extends Component
           ->orderBy('created_at', 'asc')
           ->get();
 
+    }
+
+    #[On('echo:receive_message, MessageReceived')]
+    public function evetReceibedMessage($event)
+    {
+        $message = $event['message'];
+        // $message = Message::where('message_id', $event['message'])->first();
+        $profile = $message->whatsappPhoneNumber->whatsappBusinessProfile;
+        $this->contact = json_encode($message->contact);
+
+        $this->viewMessages(json_decode($this->contact, true), $profile->whatsapp_business_profile_id);
     }
 
     public function sendMessage()

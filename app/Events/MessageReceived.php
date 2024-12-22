@@ -9,20 +9,25 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Message;
+use Illuminate\Support\Facades\Log;
 
 class MessageReceived implements ShouldBroadCast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public string $status;
+    public Message $message;
+
     /**
      * Create a new event instance.
      */
-    public function __construct(
-        public string $status,
-        public string $deliveryHandler
-    )
+    public function __construct(string $status, Message $message)
     {
-        //
+        $this->status = $status;
+        $this->message = $message;
+
+        Log::info('MessageReceived event created');
     }
 
     /**
@@ -33,5 +38,13 @@ class MessageReceived implements ShouldBroadCast
     public function broadcastOn(): Channel
     {
         return new Channel('receive_message');
+    }
+
+    public function broadcastWith(): array
+    {
+        return [
+            'status' => $this->status,
+            'message' => $this->message,
+        ];
     }
 }

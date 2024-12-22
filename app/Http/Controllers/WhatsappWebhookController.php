@@ -13,6 +13,8 @@ use App\Models\Conversation;
 use App\Models\WhatsappPhoneNumber;
 use App\Models\WhatsappBusinessAccount;
 
+use App\Events\MessageReceived;
+
 class WhatsappWebhookController extends Controller
 {
     public function handle(Request $request)
@@ -317,7 +319,8 @@ class WhatsappWebhookController extends Controller
                         file_put_contents(storage_path('logs/text.txt'), 'Error al obtener la URL del documento para ID: ' . $documentId . "\n", FILE_APPEND);
                     }
                 }
-                
+                // Log::info('Message received: ' . print_r($message->message_id, true));
+                MessageReceived::dispatch('receibed', $message);
             }
 
             // Verifica que el mensaje está en el formato esperado
