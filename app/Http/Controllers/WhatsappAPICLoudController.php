@@ -67,7 +67,7 @@ class WhatsappAPICLoudController extends Controller
                     ]);
 
                     // Buscar si el perfil ya existe
-                    if($phoneNumberRecord->whatsapp_bussines_profile_id){
+                    if ($phoneNumberRecord->whatsapp_bussines_profile_id !== null) {
                         $profileRecord = WhatsappBusinessProfile::where('whatsapp_business_profile_id', $phoneNumberRecord->whatsapp_bussines_profile_id)->first();
 
                         // Actualizar el perfil existente
@@ -80,7 +80,23 @@ class WhatsappAPICLoudController extends Controller
                             'vertical' => $profileData['vertical'] ?? null,
                             'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
                         ]);
-                    } 
+                    } else {
+                        // Crear un nuevo perfil
+                        $profileRecord = WhatsappBusinessProfile::create([
+                            'whatsapp_business_profile_id' => $phoneNumber['id'],
+                            'about' => $profileData['about'] ?? null,
+                            'address' => $profileData['address'] ?? null,
+                            'description' => $profileData['description'] ?? null,
+                            'email' => $profileData['email'] ?? null,
+                            'profile_picture_url' => $profileData['profile_picture_url'] ?? null,
+                            'vertical' => $profileData['vertical'] ?? null,
+                            'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
+                        ]);
+
+                        $phoneNumberRecord->update([
+                            'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
+                        ]);
+                    }
                 } else {
                     // Crear un nuevo número de teléfono
                     $phoneNumberRecord = WhatsappPhoneNumber::create([
