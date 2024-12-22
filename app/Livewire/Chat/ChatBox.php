@@ -19,6 +19,33 @@ class ChatBox extends Component
     public $messages = [];
     public $messageContent;
 
+    public function getListeners()
+    {
+        return [
+            'echo:receive_message,MessageReceived' => 'onMeddageReceived',
+        ];
+    }
+
+    public function sendMessage()
+    {
+        $data = [
+            'celular' => $this->contact['country_code'] . $this->contact['phone_number'],
+            'tipo' => 'OUTPUT',
+            'type' => 'TEXT',
+            'mensaje' => $this->messageContent,
+            'phone_number_id' => $this->whatsapp_phone->whatsapp_phone_id,
+        ];
+
+        $request = new \Illuminate\Http\Request();
+        $request->replace($data);
+
+        $controller = new WhatsappChatController();
+        $response = $controller->sendMessage($request);
+
+        $this->viewMessages($this->contact, $this->whatsapp_phone->whatsapp_business_profile_id);
+        $this->messageContent = '';
+    }
+
     #[On('view-messages')]
     public function viewMessages($contact, $profile_id)
     {
@@ -45,36 +72,21 @@ class ChatBox extends Component
 
     }
 
-    #[On('echo:receive_message, MessageReceived')]
-    public function evetReceibedMessage($event)
+    public function onMeddageReceived($event)
     {
-        $message = $event['message'];
+        // dd($event['message']['whatsapp_phone_id']);
+
+        $message = Message::where('message_id', $event['message']['message_id'])->first();
+        
         // $message = Message::where('message_id', $event['message'])->first();
-        $profile = $message->whatsappPhoneNumber->whatsappBusinessProfile;
+        $profile = $message->phoneNumber->businessProfile;
+
         $this->contact = json_encode($message->contact);
 
         $this->viewMessages(json_decode($this->contact, true), $profile->whatsapp_business_profile_id);
     }
 
-    public function sendMessage()
-    {
-        $data = [
-            'celular' => $this->contact['country_code'] . $this->contact['phone_number'],
-            'tipo' => 'OUTPUT',
-            'type' => 'TEXT',
-            'mensaje' => $this->messageContent,
-            'phone_number_id' => $this->whatsapp_phone->whatsapp_phone_id,
-        ];
-
-        $request = new \Illuminate\Http\Request();
-        $request->replace($data);
-
-        $controller = new WhatsappChatController();
-        $response = $controller->sendMessage($request);
-
-        $this->viewMessages($this->contact, $this->whatsapp_phone->whatsapp_business_profile_id);
-        $this->messageContent = '';
-    }
+    
 
     public function render()
     {

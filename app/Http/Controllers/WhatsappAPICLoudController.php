@@ -163,7 +163,7 @@ class WhatsappAPICLoudController extends Controller
         $api_version = env('WHATSAPP_API_VERSION');
         $url = "{$api_url}/{$api_version}/{$whatsapp_business_id}/phone_numbers";
 
-        Log::info("Fetching phone numbers from URL: " . $url);
+        // Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
         // dd($response->json()['data']);
@@ -180,7 +180,7 @@ class WhatsappAPICLoudController extends Controller
         $api_version = env('WHATSAPP_API_VERSION');
 
         $url = "{$api_url}{$api_version}/{$phone_number_id}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical";
-        Log::info("Fetching phone numbers from URL: " . $url);
+        // Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
         // dd($response->json()['data']);

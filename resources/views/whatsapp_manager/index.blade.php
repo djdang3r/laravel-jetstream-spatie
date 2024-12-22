@@ -25,8 +25,15 @@
             vertical-align: middle;
         }
     </style>
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 @stop
 
 @section('js')
     <script></script>
+@stop
+
+@section('vite')
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 @stop

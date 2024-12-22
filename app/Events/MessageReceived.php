@@ -16,18 +16,12 @@ class MessageReceived implements ShouldBroadCast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $status;
-    public Message $message;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(string $status, Message $message)
+    public function __construct(public string $status, public Message $message)
     {
-        $this->status = $status;
-        $this->message = $message;
 
-        Log::info('MessageReceived event created');
     }
 
     /**
@@ -40,11 +34,4 @@ class MessageReceived implements ShouldBroadCast
         return new Channel('receive_message');
     }
 
-    public function broadcastWith(): array
-    {
-        return [
-            'status' => $this->status,
-            'message' => $this->message,
-        ];
-    }
 }

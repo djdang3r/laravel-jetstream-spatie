@@ -22,7 +22,7 @@
                         @elseif ($message->message_type === 'AUDIO')
                             @foreach ($message->mediaFiles as $file)
                                 <audio controls>
-                                    <source src="{{ Storage::url($file->url) }}" type="audio/ogg">
+                                    <source src="{{ asset($file->url)  }}" type="audio/ogg">
                                     Your browser does not support the audio element.
                                 </audio>
                             @endforeach
@@ -30,7 +30,7 @@
                             @foreach ($message->mediaFiles as $file)
                             <ul class="mailbox-attachments d-flex align-items-stretch clearfix">
                                 <li>
-                                  <span class="mailbox-attachment-icon has-img"><img src="{{ Storage::url($file->url) }}" alt="Image" class="img-fluid"></span>
+                                  <span class="mailbox-attachment-icon has-img"><img src="{{ asset($file->url) }}" alt="Image" class="img-fluid"></span>
                                   <div class="mailbox-attachment-info">
                                     <a href="#" class="mailbox-attachment-name"><i class="fas fa-camera"></i> {{ $message->caption }}</a>
                                         <span class="mailbox-attachment-size clearfix mt-1">
