@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\Template;
 use App\Models\WhatsappBusinessAccount;
 use App\Models\WhatsappPhoneNumber;
 use App\Models\WhatsappBusinessProfile;
@@ -21,6 +22,37 @@ class WhatsappAPICLoudController extends Controller
     public function templatesList()
     {
         return view('templates.templates');
+    }
+
+    public function getTemplates($phone_profile)
+    {
+        
+        $account = WhatsappBusinessAccount::find($phone_profile->phoneNumber->businessAccount->whatsapp_business_id);
+
+        if (!$account) {
+            return response()->json(['error' => 'Account not found'], 404);
+        }
+
+        $api_token = $account->api_token;
+
+        // Iniciar una transacción
+        DB::beginTransaction();
+
+        try {
+            // Obtener los números de teléfono
+            $templates = $this->fetchTemplates($api_token, $account->whatsapp_business_id);
+
+            // Confirmar la transacción
+            DB::commit();
+
+            // Devolver la respuesta
+            return response()->json($templates);
+
+        } catch (\Exception $e) {
+            // Revertir la transacción en caso de error
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to fetch templates', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function getPhoneNumbers($whatsapp_business_id)
@@ -188,6 +220,42 @@ class WhatsappAPICLoudController extends Controller
             return $response->json();
         } else {
             throw new \Exception("Failed to fetch phone number profile: " . $response->body());
+        }
+    }
+
+    private function fetchTemplates($api_token, $whatsapp_business_id)
+    {
+        $api_url = rtrim(env('WHATSAPP_API_URL'), '/');
+        $api_version = env('WHATSAPP_API_VERSION');
+        $url = "{$api_url}/{$api_version}/{$whatsapp_business_id}/message_templates";
+
+        // Log::info("Fetching templates from URL: " . $url);
+
+        $response = Http::withToken($api_token)->get($url);
+
+        if ($response->status() == 200) {
+            $templates = $response->json()['data'];
+
+            foreach ($templates as $templateData) {
+                Template::updateOrCreate(
+                    ['wa_template_id' => $templateData['id']],
+                    [
+                        'whatsapp_business_id' => $whatsapp_business_id,
+                        'name' => $templateData['name'],
+                        'language' => $templateData['language'],
+                        'category' => $templateData['category'],
+                        'status' => $templateData['status'],
+                        'json' => json_encode($templateData),
+                    ]
+                );
+            }
+
+            $templates = Template::where('whatsapp_business_id', $whatsapp_business_id)->get();
+
+            return $templates;
+        } else {
+            // return response()->json(['error' => 'Failed to fetch templates', 'message' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to fetch templates', 'message' => $response->body()], 500);
         }
     }
 }
