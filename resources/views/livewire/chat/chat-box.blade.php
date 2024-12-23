@@ -61,6 +61,7 @@
                         
                         @if ($isOutput)
                             <span class="float-right">
+                                <span class="contacts-list-msg" >
                                 <sub>{{ $message->created_at->format('d M h:i a') }}
                                     @if ($message->delivered_at)
                                         @if ($message->readed_at)

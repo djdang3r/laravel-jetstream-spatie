@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name', 250);
             $table->string('language', 45);
             $table->string('category', 45);
+            $table->string('status', 45)->nullable();
             $table->json('json');
             $table->timestamps();
             $table->softDeletes();

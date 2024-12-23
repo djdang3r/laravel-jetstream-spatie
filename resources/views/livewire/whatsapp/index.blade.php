@@ -44,7 +44,7 @@
                                                                             <small
                                                                                 class="contacts-list-date float-right">2/28/2015</small>
                                                                         </span>
-                                                                        <span class="contacts-list-msg">
+                                                                        <span class="contacts-list-msg" style="display: inline-flex; align-items: center;">
                                                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                                                 width="16" height="16"
                                                                                 fill="currentColor"
@@ -54,8 +54,7 @@
                                                                                     d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486z">
                                                                                 </path>
                                                                             </svg>
-
-                                                                            How have you been? I was...
+                                                                            <span style="margin-left: 4px;">How have you been? I was...</span>
                                                                         </span>
                                                                         <span class="badge badge-success float-right">
                                                                             4
@@ -79,56 +78,7 @@
                                 </div>
 
                                 <div class="tab-pane" id="templates">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Template Manager</h3>
-
-                                            <div class="card-tools">
-                                                <ul class="pagination pagination-sm float-right">
-                                                    <li class="page-item"><a class="page-link" href="#">«</a></li>
-                                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                                    <li class="page-item"><a class="page-link" href="#">»</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <!-- /.card-header -->
-                                        <div class="card-body p-0">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 10px">#</th>
-                                                        <th>Template name</th>
-                                                        <th>Category</th>
-                                                        <th>Languaje</th>
-                                                        <th>Last Updated</th>
-                                                        <th>Messages</th>
-                                                        <th style="width: 40px">Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>1.</td>
-                                                        <td>hello_world</td>
-                                                        <td>Utilizad</td>
-                                                        <td>English (US)</td>
-                                                        <td>
-                                                            <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                                                2021-09-01
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="progress progress-xs">
-                                                                <div class="progress-bar progress-bar-danger"
-                                                                    style="width: 55%"></div>
-                                                            </div>
-                                                        </td>
-                                                        <td><span class="badge bg-danger">55%</span></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <!-- /.card-body -->
-                                    </div>
+                                    @livewire('whatsapp.templates')
                                 </div>
 
                                 <div class="tab-pane" id="update-account">

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Template extends Model
 {
@@ -20,8 +21,21 @@ class Template extends Model
         'name',
         'language',
         'category',
+        'status',
         'json',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = Str::uuid()->toString();
+                // $model->{$model->getKeyName()} = 'prof_' . Str::uuid()->toString();
+            }
+        });
+    }
 
     public function businessAccount()
     {

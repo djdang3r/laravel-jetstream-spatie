@@ -34,6 +34,7 @@ class ChatList extends Component
     public function selectContact($contact)
     {
         $this->dispatch("view-messages", $contact, $this->phone_profile_id);
+
     }
 
     public function render()
