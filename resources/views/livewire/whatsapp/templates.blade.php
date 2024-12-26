@@ -81,4 +81,6 @@
         </div>
         <!-- /.card-body -->
     </div>
+
+    @livewire('whatsapp.modals.view-template-modal')
 </div>

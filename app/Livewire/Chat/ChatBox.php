@@ -19,6 +19,8 @@ class ChatBox extends Component
     public $messages = [];
     public $messageContent;
 
+    // protected $listeners = ['echo:receive_message, MessageReceived' => 'onMessageReceived'];
+
     public function getListeners()
     {
         return [
@@ -72,6 +74,7 @@ class ChatBox extends Component
 
     }
 
+    // #[On('echo:receive_message, MessageReceived')]
     public function onMessageReceived($event)
     {
         // dd($event['message']['whatsapp_phone_id']);

@@ -15,9 +15,18 @@ class Templates extends Component
     public $templates = [];
     public $selectedProfile = null;
 
+    protected $listeners = ['echo:receive_message, MessageReceived' => 'onMessageReceived'];
+
     public function mount()
     {
 
+    }
+
+    public function onMessageReceived($payload)
+    {
+        // Maneja el evento aquí
+        // Puedes agregar lógica para actualizar los mensajes o cualquier otra cosa
+        dd($payload);
     }
 
     #[On('conversations-list')]

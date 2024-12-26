@@ -38,14 +38,10 @@
         }
     </style>
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css'])
 @stop
 
 @section('js')
+    @vite(['resources/js/app.js'])
     <script></script>
-@stop
-
-@section('vite')
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 @stop

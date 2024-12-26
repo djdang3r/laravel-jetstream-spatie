@@ -60,6 +60,7 @@ class WhatsappAPICLoudController extends Controller
         $account = WhatsappBusinessAccount::find($whatsapp_business_id);
 
         if (!$account) {
+            Log::error('Account not found', ['whatsapp_business_id' => $whatsapp_business_id]);
             return response()->json(['error' => 'Account not found'], 404);
         }
 
@@ -71,11 +72,11 @@ class WhatsappAPICLoudController extends Controller
         try {
             // Obtener los números de teléfono
             $phoneNumbers = $this->fetchPhoneNumbers($api_token, $whatsapp_business_id);
-
-            
+            Log::info('Phone numbers fetched', ['phoneNumbers' => $phoneNumbers]);
 
             foreach ($phoneNumbers as $phoneNumber) {
                 $cleanedPhoneNumber = preg_replace('/\D/', '', $phoneNumber['display_phone_number']);
+                Log::info('Processing phone number', ['phoneNumber' => $phoneNumber]);
 
                 // Buscar si el número de teléfono ya existe
                 $phoneNumberRecord = WhatsappPhoneNumber::where('phone_number_id', $phoneNumber['id'])->first();
@@ -83,20 +84,15 @@ class WhatsappAPICLoudController extends Controller
                 // Obtener el perfil del número de teléfono
                 $profileData = $this->fetchPhoneNumberProfile($api_token, $phoneNumber['id']);
                 $profileData = $profileData['data'][0];
+                Log::info('Profile data fetched', ['profileData' => $profileData]);
 
                 if ($phoneNumberRecord) {
                     // Actualizar el número de teléfono existente
                     $phoneNumberRecord->update([
-                        // 'whatsapp_business_accounts_id' => $whatsapp_business_id,
                         'display_phone_number' => $cleanedPhoneNumber,
                         'verified_name' => $phoneNumber['verified_name'],
-                        // 'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
-                        // 'code_verification_status' => $phoneNumber['code_verification_status'],
-                        // 'quality_rating' => $phoneNumber['quality_rating'],
-                        // 'platform_type' => $phoneNumber['platform_type'],
-                        // 'throughput_level' => $phoneNumber['throughput']['level'],
-                        // 'webhook_configuration' => $phoneNumber['webhook_configuration']['application'] ?? null,
                     ]);
+                    Log::info('Phone number updated', ['phoneNumberRecord' => $phoneNumberRecord]);
 
                     // Buscar si el perfil ya existe
                     if ($phoneNumberRecord->whatsapp_bussines_profile_id !== null) {
@@ -112,6 +108,7 @@ class WhatsappAPICLoudController extends Controller
                             'vertical' => $profileData['vertical'] ?? null,
                             'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
                         ]);
+                        Log::info('Profile updated', ['profileRecord' => $profileRecord]);
                     } else {
                         // Crear un nuevo perfil
                         $profileRecord = WhatsappBusinessProfile::create([
@@ -124,6 +121,7 @@ class WhatsappAPICLoudController extends Controller
                             'vertical' => $profileData['vertical'] ?? null,
                             'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
                         ]);
+                        Log::info('New profile created', ['profileRecord' => $profileRecord]);
 
                         $phoneNumberRecord->update([
                             'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
@@ -136,13 +134,8 @@ class WhatsappAPICLoudController extends Controller
                         'whatsapp_business_accounts_id' => $whatsapp_business_id,
                         'display_phone_number' => $cleanedPhoneNumber,
                         'verified_name' => $phoneNumber['verified_name'],
-                        // 'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
-                        // 'code_verification_status' => $phoneNumber['code_verification_status'],
-                        // 'quality_rating' => $phoneNumber['quality_rating'],
-                        // 'platform_type' => $phoneNumber['platform_type'],
-                        // 'throughput_level' => $phoneNumber['throughput']['level'],
-                        // 'webhook_configuration' => $phoneNumber['webhook_configuration']['application'] ?? null,
                     ]);
+                    Log::info('New phone number created', ['phoneNumberRecord' => $phoneNumberRecord]);
 
                     // Crear un nuevo perfil
                     $profileRecord = WhatsappBusinessProfile::create([
@@ -155,6 +148,7 @@ class WhatsappAPICLoudController extends Controller
                         'vertical' => $profileData['vertical'] ?? null,
                         'messaging_product' => $profileData['messaging_product'] ?? 'whatsapp',
                     ]);
+                    Log::info('New profile created', ['profileRecord' => $profileRecord]);
 
                     $phoneNumberRecord->update([
                         'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
@@ -165,6 +159,7 @@ class WhatsappAPICLoudController extends Controller
                 if (isset($profileData['websites'])) {
                     // Eliminar sitios web existentes
                     Website::where('whatsapp_business_profile_id', $profileRecord->whatsapp_business_profile_id)->delete();
+                    Log::info('Existing websites deleted', ['profileRecord' => $profileRecord]);
 
                     // Guardar nuevos sitios web
                     foreach ($profileData['websites'] as $website) {
@@ -172,12 +167,14 @@ class WhatsappAPICLoudController extends Controller
                             'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
                             'website' => $website,
                         ]);
+                        Log::info('New website created', ['website' => $website]);
                     }
                 }
             }
 
             // Confirmar la transacción
             DB::commit();
+            Log::info('Transaction committed');
 
             // Devolver la respuesta
             return response()->json($phoneNumbers);
@@ -185,6 +182,7 @@ class WhatsappAPICLoudController extends Controller
         } catch (\Exception $e) {
             // Revertir la transacción en caso de error
             DB::rollBack();
+            Log::error('Failed to fetch phone numbers or profiles', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to fetch phone numbers or profiles', 'message' => $e->getMessage()], 500);
         }
     }
@@ -198,6 +196,7 @@ class WhatsappAPICLoudController extends Controller
         // Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
+
         // dd($response->json()['data']);
         if ($response->successful()) {
             return $response->json()['data'];
@@ -208,10 +207,10 @@ class WhatsappAPICLoudController extends Controller
 
     private function fetchPhoneNumberProfile($api_token, $phone_number_id)
     {
-        $api_url = env('WHATSAPP_API_URL');
+        $api_url = rtrim(env('WHATSAPP_API_URL'), '/');
         $api_version = env('WHATSAPP_API_VERSION');
 
-        $url = "{$api_url}{$api_version}/{$phone_number_id}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical";
+        $url = "{$api_url}/{$api_version}/{$phone_number_id}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical";
         // Log::info("Fetching phone numbers from URL: " . $url);
 
         $response = Http::withToken($api_token)->get($url);
