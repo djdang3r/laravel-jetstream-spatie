@@ -15,6 +15,7 @@ class WhatsappBusinessAccount extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'whatsapp_business_id',
         'api_token',
         'webhook_token',
     ];
