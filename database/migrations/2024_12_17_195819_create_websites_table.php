@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('websites', function (Blueprint $table) {
             $table->uuid('website_id')->primary();
             $table->uuid('whatsapp_business_profile_id');
-            $table->string('website', 45)->unique();
+            $table->string('website', 45);
             $table->timestamps();
             $table->softDeletes();
 
