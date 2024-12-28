@@ -160,14 +160,23 @@ class WhatsappAPICLoudController extends Controller
                     // Eliminar sitios web existentes
                     Website::where('whatsapp_business_profile_id', $profileRecord->whatsapp_business_profile_id)->delete();
                     Log::info('Existing websites deleted', ['profileRecord' => $profileRecord]);
-
+                
                     // Guardar nuevos sitios web
                     foreach ($profileData['websites'] as $website) {
-                        Website::create([
-                            'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
-                            'website' => $website,
-                        ]);
-                        Log::info('New website created', ['website' => $website]);
+                        // Verificar si el sitio web ya existe
+                        $existingWebsite = Website::Where('whatsapp_business_profile_id', $profileRecord->whatsapp_business_profile_id)
+                                                  ->where('website', $website)
+                                                  ->first();
+                
+                        if (!$existingWebsite) {
+                            Website::create([
+                                'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
+                                'website' => $website,
+                            ]);
+                            Log::info('New website created', ['website' => $website]);
+                        } else {
+                            Log::info('Website already exists', ['website' => $website]);
+                        }
                     }
                 }
             }
