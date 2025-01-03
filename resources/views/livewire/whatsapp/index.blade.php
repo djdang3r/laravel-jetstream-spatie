@@ -3,7 +3,8 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-3">
-                    @livewire('whatsapp.whatsapp-accounts')
+                    {{-- @livewire('whatsapp.whatsapp-accounts') --}}
+                    <livewire:whatsapp.whatsapp-accounts />
                 </div>
 
                 <div class="col-md-9">
@@ -72,13 +73,15 @@
                                             </div>
                                         </div>
                                         <div class="col-8">
-                                            @livewire('chat.index')
+                                            {{-- @livewire('chat.index') --}}
+                                            <livewire:chat.index />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="tab-pane" id="templates">
-                                    @livewire('whatsapp.templates')
+                                    {{-- @livewire('whatsapp.templates') --}}
+                                    <livewire:whatsapp.templates />
                                 </div>
 
                                 <div class="tab-pane" id="update-account">

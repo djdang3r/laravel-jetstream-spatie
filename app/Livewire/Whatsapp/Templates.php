@@ -3,7 +3,7 @@
 namespace App\Livewire\Whatsapp;
 
 use Livewire\Component;
-use Livewire\Attributes\On; 
+use Livewire\Attributes\On;
 use App\Models\Template;
 use App\Models\WhatsappBusinessProfile;
 use App\Http\Controllers\WhatsappChatController;
@@ -12,21 +12,17 @@ use App\Http\Controllers\WhatsappAPICLoudController;
 class Templates extends Component
 {
     public $phone_profile_id;
+    public $template_id = '';
+    public $template = '';
     public $templates = [];
     public $selectedProfile = null;
 
-    protected $listeners = ['echo:receive_message, MessageReceived' => 'onMessageReceived'];
+    public $showViewModal = false;
+    public $modal_delete_template = false;
 
     public function mount()
     {
 
-    }
-
-    public function onMessageReceived($payload)
-    {
-        // Maneja el evento aquí
-        // Puedes agregar lógica para actualizar los mensajes o cualquier otra cosa
-        dd($payload);
     }
 
     #[On('conversations-list')]
@@ -45,6 +41,25 @@ class Templates extends Component
 
         $this->templates = $templates;
 
+    }
+
+    public function selectTemplate($template_id)
+    {
+        $template = Template::find($template_id);
+        $this->template_id = $template_id;
+        $this->template = $template;
+
+        $this->dispatch("detail-template", template: $template);
+    }
+
+    public function viewTemplate()
+    {
+        $this->showViewModal = true;
+    }
+
+    public function delteTemplate( $template_id )
+    {
+        $this->modal_delete_template = true;
     }
 
     public function render()

@@ -18,7 +18,7 @@ class WhatsappAPICLoudController extends Controller
     {
         return view('whatsapp_manager.index');
     }
-    
+
     public function templatesList()
     {
         return view('templates.templates');
@@ -26,7 +26,7 @@ class WhatsappAPICLoudController extends Controller
 
     public function getTemplates($phone_profile)
     {
-        
+
         $account = WhatsappBusinessAccount::find($phone_profile->phoneNumber->businessAccount->whatsapp_business_id);
 
         if (!$account) {
@@ -160,14 +160,14 @@ class WhatsappAPICLoudController extends Controller
                     // Eliminar sitios web existentes
                     Website::where('whatsapp_business_profile_id', $profileRecord->whatsapp_business_profile_id)->delete();
                     Log::info('Existing websites deleted', ['profileRecord' => $profileRecord]);
-                
+
                     // Guardar nuevos sitios web
                     foreach ($profileData['websites'] as $website) {
                         // Verificar si el sitio web ya existe
                         $existingWebsite = Website::Where('whatsapp_business_profile_id', $profileRecord->whatsapp_business_profile_id)
                                                   ->where('website', $website)
                                                   ->first();
-                
+
                         if (!$existingWebsite) {
                             Website::create([
                                 'whatsapp_business_profile_id' => $profileRecord->whatsapp_business_profile_id,
@@ -265,5 +265,117 @@ class WhatsappAPICLoudController extends Controller
             // return response()->json(['error' => 'Failed to fetch templates', 'message' => $e->getMessage()], 500);
             return response()->json(['error' => 'Failed to fetch templates', 'message' => $response->body()], 500);
         }
+    }
+
+    public function getTemplateDetail(Request $request)
+    {
+        $template = Template::find($request->template_id);
+        // Llama a la función renderWhatsAppTemplate
+        $templateDetail = $this->renderWhatsAppTemplate($template->json, $template->template_id, $template->wa_template_id);
+
+        return $templateDetail;
+    }
+
+    public function getTemplateJson(Request $request)
+    {
+        $template = Template::find($request->id);
+        return json_decode($template->json);
+    }
+
+    public function updateTemplate(Request $request)
+    {
+        $template = Template::where('wa_template_id', $request->templateId)->first();
+        $wa_account = WhatsappBusinessAccount::find($template->whatsapp_business_id);
+
+        // Enviar el mensaje a la API de WhatsApp
+        $apiUrl = env('WHATSAPP_API_URL') . env('WHATSAPP_API_VERSION') . '/' . $request->templateId;
+        $apiToken = $wa_account->api_token;
+
+        $payload = $request->jsonBody;
+
+        $response = Http::withToken($apiToken)->post($apiUrl, $payload);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'Solicitud de Actualizacion de plantilla enviada con éxito.'], 200);
+        } else {
+            return response()->json(['error' => $response->json()], $response->status());
+        }
+    }
+
+    public static function renderWhatsAppTemplate($json, $template_id, $wa_template_id)
+    {
+        $template = json_decode($json, true);
+        $html = '<div class="wb-template col-md-6 col-sm-6 col-12">
+                    <div class="plantilla-card plantilla-card-header bg-gradient-success">
+                        <div class="">
+                            <div class="factura-title d-flex justify-content-between align-items-center">
+                                <a>' . htmlspecialchars($template['name']) . '</a>
+                                <!--
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" role="menu" style="">
+                                        <a class="dropdown-item modal-editTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Editar Plantilla</a>
+                                        <a class="dropdown-item modal-detailTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Detalles de Plantilla</a>
+                                        <a class="dropdown-item modal-sendTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Enviar Plantilla</a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <a class="dropdown-item modal-deleteTemplate" href="#">Eliminar Plantilla</a>
+                                    </div>
+                                </div>
+                                -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="plantilla-card plantilla-card-content">
+                        <div class="">
+                            <div class="">';
+
+        foreach ($template['components'] as $component) {
+            switch ($component['type']) {
+                case 'HEADER':
+                    $headerText = isset($component['text']) ? (isset($component['example']['header_text']) ? self::replaceParameters($component['text'], $component['example']['header_text']) : $component['text']) : '';
+                    $html .= '<div class="plantilla-header"><span>' . $headerText . '</span></div>';
+                    break;
+
+                case 'BODY':
+                    $bodyText = isset($component['text']) ? (isset($component['example']['body_text'][0]) ? self::replaceParameters($component['text'], $component['example']['body_text'][0]) : $component['text']) : '';
+                    $html .= '<div class="plantilla-body"><span>' . nl2br($bodyText) . '</span></div>';
+                    break;
+
+                case 'FOOTER':
+                    $footerText = isset($component['text']) ? htmlspecialchars($component['text']) : '';
+                    $html .= '<div class="plantilla-footer"><span>' . $footerText . '</span></div>';
+                    break;
+            }
+        }
+
+        // Hora como pie de página alineada a la derecha
+        $html .= '<div class="plantilla-time"><time aria-hidden="true" class="">4:33 pm</time></div>';
+
+        // Añadir los botones al final
+        foreach ($template['components'] as $component) {
+            if ($component['type'] === 'BUTTONS') {
+                foreach ($component['buttons'] as $button) {
+                    $buttonUrl = isset($button['url']) ? (isset($button['example'][0]) ? str_replace('{{1}}', $button['example'][0], $button['url']) : $button['url']) : '#';
+                    $buttonText = isset($button['text']) ? htmlspecialchars($button['text']) : '';
+                    $html .= '<div class="plantilla-button"><div class=""><a href="#" class="">' . $buttonText . '</a></div></div>';
+                }
+            }
+        }
+
+        $html .= '</div></div></div></div>';
+        return $html;
+    }
+
+    public static function replaceParameters($text, $parameters)
+    {
+        foreach ($parameters as $index => $param) {
+            $placeholder = '{{' . ($index + 1) . '}}';
+            $text = str_replace($placeholder, htmlspecialchars($param), $text);
+        }
+        return $text;
     }
 }

@@ -1,7 +1,8 @@
 <div>
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Template Manager</h3>
+            <h3 class="card-title">Template Manager - {{ $template_id }}</h3>
+            <input type="hidden" id="template_id" value="{{ $template_id }}">
             <div class="card-tools">
                 <ul class="pagination pagination-sm float-right">
                     <li class="page-item"><a class="page-link" href="#">«</a></li>
@@ -26,8 +27,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($templates as $template)
-                        <tr>
+                    @foreach($templates as $temp)
+                        <tr wire:temp>
                             <td>{{ $loop->iteration }}.</td>
                             <td>
                                 <!-- Add any actions you need here -->
@@ -37,42 +38,41 @@
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <div class="dropdown-menu" role="menu" style="">
-                                        <a class="dropdown-item modal-editTemplate" href="#" data-template-name="{{ $template->name }}" data-template-id="{{ $template->template_id }}" data-template-wa-id="{{ $template->wa_template_id }}">Editar Plantilla</a>
-                                        <a class="dropdown-item modal-detailTemplate" href="#" data-template-name="{{ $template->name }}" data-template-id="{{ $template->template_id }}" data-template-wa-id="{{ $template->wa_template_id }}">Detalles de Plantilla</a>
-                                        <a class="dropdown-item modal-sendTemplate" href="#" data-template-name="{{ $template->name }}" data-template-id="{{ $template->template_id }}" data-template-wa-id="{{ $template->wa_template_id }}">Enviar Plantilla</a>
-        
+                                        <a class="dropdown-item modal-detailTemplate" data-toggle="modal" data-target="#modal_detail_template" href="#" data-template-name="{{ $temp->name }}" data-template-id="{{ $temp->template_id }}" data-template-wa-id="{{ $temp->wa_template_id }}">Detalles de Plantilla</a>
+                                        <a class="dropdown-item modal-editTemplate" data-toggle="modal" data-target="#modal_edit_template" href="#" data-template-name="{{ $temp->name }}" data-template-id="{{ $temp->template_id }}" data-template-wa-id="{{ $temp->wa_template_id }}">Editar Plantilla</a>
+                                        <a class="dropdown-item modal-sendTemplate" data-toggle="modal" data-target="#modal_send_template" href="#" data-template-name="{{ $temp->name }}" data-template-id="{{ $temp->template_id }}" data-template-wa-id="{{ $temp->wa_template_id }}">Enviar Plantilla</a>
+
                                         <div class="dropdown-divider"></div>
-        
-                                        <a class="dropdown-item modal-deleteTemplate" href="#">Eliminar Plantilla</a>
+
+                                        <a class="dropdown-item modal-deleteTemplate" data-toggle="modal" data-target="#modal_delete_template" href="#">Eliminar Plantilla</a>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $template->name }}</td>
-                            @if ($template->category == 'AUTHENTICATION')
-                                <td><span class="badge bg-primary"><i class="fa fa-lock" aria-hidden="true"></i></span> {{ $template->category }}</td>
-                            @elseif ($template->category == 'MARKETING')
-                                <td><span class="badge bg-info"><i class="fa fa-tag" aria-hidden="true"></i></span> {{ $template->category }}</td>
-                            @elseif ($template->category == 'UTILITY')
-                                <td><span class="badge bg-navy"><i class="fa fa-paperclip" aria-hidden="true"></i></span> {{ $template->category }}</td>
+                            <td>{{ $temp->name }}</td>
+                            @if ($temp->category == 'AUTHENTICATION')
+                                <td><span class="badge bg-primary"><i class="fa fa-lock" aria-hidden="true"></i></span> {{ $temp->category }}</td>
+                            @elseif ($temp->category == 'MARKETING')
+                                <td><span class="badge bg-info"><i class="fa fa-tag" aria-hidden="true"></i></span> {{ $temp->category }}</td>
+                            @elseif ($temp->category == 'UTILITY')
+                                <td><span class="badge bg-navy"><i class="fa fa-paperclip" aria-hidden="true"></i></span> {{ $temp->category }}</td>
                             @endif
-                            <td>{{ $template->language }}</td>
+                            <td>{{ $temp->language }}</td>
                             <td>
                                 <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                    {{ $template->updated_at->format('d M h:i a') }}
+                                    {{ $temp->updated_at->format('d M h:i a') }}
                                 </div>
                             </td>
                             <td>
                                 <div class="progress progress-xs">
-                                    <div class="progress-bar progress-bar-danger"
-                                        style="width: 55%"></div>
+                                    <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
                                 </div>
                             </td>
-                            @if ($template->status == 'APPROVED')
-                                <td><span class="badge bg-success">{{ $template->status }}</span></td>
-                            @elseif ($template->status == 'PENDING')
-                                <td><span class="badge bg-warning">{{ $template->status }}</span></td>
-                            @elseif ($template->status == 'REJECTED')
-                                <td><span class="badge bg-danger">{{ $template->status }}</span></td>
+                            @if ($temp->status == 'APPROVED')
+                                <td><span class="badge bg-success">{{ $temp->status }}</span></td>
+                            @elseif ($temp->status == 'PENDING')
+                                <td><span class="badge bg-warning">{{ $temp->status }}</span></td>
+                            @elseif ($temp->status == 'REJECTED')
+                                <td><span class="badge bg-danger">{{ $temp->status }}</span></td>
                             @endif
                         </tr>
                     @endforeach
@@ -81,6 +81,10 @@
         </div>
         <!-- /.card-body -->
     </div>
-
-    @livewire('whatsapp.modals.view-template-modal')
+    <!-- /.card -->
+    <livewire:whatsapp.modals.edit-template-modal>
+    <livewire:whatsapp.modals.send-template-modal>
+    <livewire:whatsapp.modals.view-template-modal>
+    <livewire:whatsapp.modals.delete-template-modal>
 </div>
+

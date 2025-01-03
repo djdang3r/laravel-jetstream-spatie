@@ -1,18 +1,18 @@
-<div class="modal fade" id="modal_detail_template" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalDetailTemplateLabel" aria-hidden="true">
+<div class="modal fade" id="modal_create_template" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalCreateTemplateLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content bg-success">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalDetailTemplateLabel">Edit Template</h5>
+          <h5 class="modal-title" id="modalCreateTemplateLabel">Send Template</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body" id="modal_detail_template_body">
-            ...
+        <div class="modal-body">
+          ...
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          {{-- <button type="button" class="btn btn-primary">Understood</button> --}}
+          <button type="button" class="btn btn-primary">Understood</button>
         </div>
       </div>
     </div>
