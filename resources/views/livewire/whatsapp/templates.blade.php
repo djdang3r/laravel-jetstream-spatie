@@ -1,14 +1,10 @@
 <div>
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Template Manager - {{ $template_id }}</h3>
+            <h3 class="card-title">Template Manager</h3>
             <input type="hidden" id="template_id" value="{{ $template_id }}">
             <div class="card-tools">
-                <ul class="pagination pagination-sm float-right">
-                    <li class="page-item"><a class="page-link" href="#">«</a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">»</a></li>
-                </ul>
+                <button type="button" class="btn btn-block btn-primary btn-lg" data-toggle="modal" data-target="#modal_create_template">+ Crear Nueva Plantilla</button>
             </div>
         </div>
         <!-- /.card-header -->
@@ -86,5 +82,6 @@
     <livewire:whatsapp.modals.send-template-modal>
     <livewire:whatsapp.modals.view-template-modal>
     <livewire:whatsapp.modals.delete-template-modal>
+    <livewire:whatsapp.modals.create-template-modal>
 </div>
 

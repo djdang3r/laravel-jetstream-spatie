@@ -7,13 +7,22 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Understood</button>
-        </div>
+        <form id="send_template_form">
+            @csrf
+            <input type="hidden" name="send_template_id" id="send_template_id">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12" id="detail_template_body"></div>
+                </div>
+                <div class="row">
+                    <div class="col-12" id="sendTemplateForm"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
       </div>
     </div>
 </div>

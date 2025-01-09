@@ -370,6 +370,139 @@ class WhatsappAPICLoudController extends Controller
         return $html;
     }
 
+    public function sendTemplate(Request $request)
+    {
+        $templateId = $request->input('send_template_id');
+        $countryCode = ltrim($request->input('countryCode'), '+');
+        $phoneNumber = $request->input('phoneNumber');
+        $recipient = $countryCode . $phoneNumber;
+
+        // Obtener los parámetros del formulario
+        $params = array_filter($request->all(), function($key) {
+            return strpos($key, 'param_') === 0;
+        }, ARRAY_FILTER_USE_KEY);
+
+        if ($templateId && $recipient) {
+            // Obtener la plantilla desde la base de datos
+            $template = Template::where('template_id', $templateId)->first();
+            $wa_account = WhatsappBusinessAccount::find($template->whatsapp_business_id)->phoneNumbers->first();
+
+            if ($template) {
+                $templateJson = json_decode($template->json, true);
+
+                // Construir el cuerpo de la solicitud
+                $components = [];
+                $mensaje = ""; // Variable para construir el mensaje
+
+                foreach ($templateJson['components'] as $component) {
+                    $componentType = strtolower($component['type']);
+                    if ($componentType === 'footer') {
+                        continue; // Ignorar el componente footer
+                    }
+
+                    $componentData = ['type' => $componentType];
+
+                    if (isset($component['text'])) {
+                        $parameters = [];
+                        $matches = [];
+                        preg_match_all('/{{\d+}}/', $component['text'], $matches);
+                        $text = $component['text'];
+                        foreach ($matches[0] as $index => $match) {
+                            $paramValue = $params["param_{$component['type']}_{$index}"] ?? '';
+                            $text = str_replace($match, $paramValue, $text);
+                            $parameters[] = [
+                                'type' => 'text',
+                                'text' => $paramValue
+                            ];
+                        }
+                        $mensaje .= $text . "\n"; // Agregar el texto al mensaje
+                        if (!empty($parameters)) {
+                            $componentData['parameters'] = $parameters;
+                        }
+                        $components[] = $componentData;
+                    } elseif ($componentType === 'buttons' && isset($component['buttons']) && count($component['buttons']) > 0) {
+                        foreach ($component['buttons'] as $buttonIndex => $button) {
+                            $parameters = [];
+                            if (isset($button['url'])) {
+                                $matches = [];
+                                preg_match_all('/{{\d+}}/', $button['url'], $matches);
+                                foreach ($matches[0] as $index => $match) {
+                                    $parameters[] = [
+                                        'type' => 'text',
+                                        'text' => $params["param_BUTTON_{$buttonIndex}_{$index}"] ?? ''
+                                    ];
+                                }
+                            } elseif (isset($button['parameters'])) {
+                                $parameters = $button['parameters'];
+                            }
+
+                            $components[] = [
+                                'type' => 'button',
+                                'sub_type' => strtolower($button['type']),
+                                'index' => $buttonIndex,
+                                'parameters' => $parameters
+                            ];
+                        }
+                    } elseif (isset($component['parameters'])) {
+                        $componentData['parameters'] = $component['parameters'];
+                        $components[] = $componentData;
+                    } else {
+                        $components[] = $componentData;
+                    }
+                }
+
+                // Construir el cuerpo de la solicitud JSON
+                $requestBody = [
+                    'messaging_product' => 'whatsapp',
+                    'to' => $recipient,
+                    'type' => 'template',
+                    'template' => [
+                        'name' => $templateJson['name'],
+                        'language' => [
+                            'code' => $templateJson['language'],
+                            'policy' => 'deterministic'
+                        ],
+                        'components' => $components
+                    ]
+                ];
+
+                // Enviar la solicitud a la API de WhatsApp
+                $apiUrl = env('WHATSAPP_API_URL') . env('WHATSAPP_API_VERSION') . '/' . $wa_account->phone_number_id . '/messages';
+                $apiToken = $wa_account->api_token;
+
+                // dd($apiUrl, $requestBody);
+                // exit();
+
+                $response = Http::withToken($apiToken)->post($apiUrl, $requestBody);
+
+                if ($response->successful()) {
+                    $responseData = $response->json();
+                    if (isset($responseData['messages'][0]['id'])) {
+                        $messageId = $responseData['messages'][0]['id'];
+                        // Guardar el mensaje en la base de datos
+                        DB::table('mensaje_whatsapp')->insert([
+                            'celular' => $recipient,
+                            'mensaje' => $mensaje,
+                            'tipo' => 'SALIDA',
+                            'type' => 'TEMPLATE',
+                            'fechaenvio' => now(),
+                            'wb_message_id' => $messageId
+                        ]);
+                        return response()->json(['success' => 'Mensaje enviado correctamente', 'message_id' => $messageId], 200);
+                    } else {
+                        return response()->json(['error' => 'Error en la respuesta de la API de WhatsApp', 'response' => $responseData], 500);
+                    }
+                } else {
+                    return response()->json(['error' => $response->json()], $response->status());
+                }
+            } else {
+                return response()->json(['error' => 'Plantilla no encontrada'], 404);
+            }
+        } else {
+            return response()->json(['error' => 'Datos incompletos para enviar la plantilla'], 400);
+        }
+    }
+
     public static function replaceParameters($text, $parameters)
     {
         foreach ($parameters as $index => $param) {
