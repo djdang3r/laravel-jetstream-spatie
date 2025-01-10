@@ -18,6 +18,7 @@ class WhatsappPhoneNumber extends Model
     protected $fillable = [
         'whatsapp_business_accounts_id',
         'whatsapp_business_profile_id',
+        'whatsapp_bot_id',
         'display_phone_number',
         'phone_number_id',
         'verified_name',
@@ -33,6 +34,11 @@ class WhatsappPhoneNumber extends Model
                 // $model->{$model->getKeyName()} = 'phone_' . Str::uuid()->toString();
             }
         });
+    }
+
+    public function bot()
+    {
+        return $this->belongsTo(WhatsappBot::class, 'whatsapp_bot_id', 'whatsapp_bot_id');
     }
 
     public function messages()

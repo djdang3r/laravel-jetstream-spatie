@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('readed_at', 45)->nullable();
             $table->string('edited_at', 45)->nullable();
             $table->json('json')->nullable();
+            $table->boolean('bot')->default(false); // Añadir el campo booleano 'bot'
             $table->timestamps();
             $table->softDeletes();
 

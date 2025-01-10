@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Route;
 
-Route::post('/webhook', [WhatsappWebhookController::class, 'handle']);
-Route::get('/webhook', [WhatsappWebhookController::class, 'handle']);
+Route::post('/webhook-app', [WhatsappWebhookController::class, 'handle']);
+Route::get('/webhook-app', [WhatsappWebhookController::class, 'handle']);
 
 
 Route::get('/', function () {

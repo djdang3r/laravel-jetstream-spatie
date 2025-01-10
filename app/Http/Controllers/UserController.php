@@ -19,7 +19,7 @@ class UserController extends Controller
 
 
         $data = [];
-        
+
         foreach ($users as $user) {
             // Definir los botones
             //$btnEdit = '<a href="/users/edit/'.$user->id.'" class="btn btn-primary">Edit</a>';
@@ -34,7 +34,7 @@ class UserController extends Controller
             $btnDetails = '<a href="/users/'.$user->id.'" class="btn btn-xs btn-default text-teal mx-1 shadow" title="Details">
                       <i class="fa fa-lg fa-fw fa-eye"></i>
                   </a>';
-    
+
             // Añadir los datos del usuario al arreglo 'data'
             $data[] = [
                 $user->id,
@@ -54,7 +54,7 @@ class UserController extends Controller
         $userPermissions = $user->getAllPermissions();
         $superAdminCount = User::with('roles')->get();
 
-        $roles = $user->getRoleNames(); 
+        $roles = $user->getRoleNames();
 
         return view('users.user-profile', compact('user', 'roles', 'modules', 'userPermissions', 'canEditPermissions'));
     }
@@ -67,11 +67,11 @@ class UserController extends Controller
     }
 
     public function assignPermission(Request $request, User $user)
-{
+    {
         $permissionName = $request->input('permission');
         $isChecked = $request->input('isChecked');
 
-        if ($isChecked === 'true') { 
+        if ($isChecked === 'true') {
             $user->givePermissionTo($permissionName);
         } else {
             $user->revokePermissionTo($permissionName);
@@ -79,5 +79,5 @@ class UserController extends Controller
 
         return response()->json(['status' => 'success']);
     }
-    
+
 }

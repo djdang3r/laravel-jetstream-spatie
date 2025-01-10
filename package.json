@@ -1,9 +1,26 @@
 {
+    "name": "base-bailey-json",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/app.js",
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "vite build"
+        "lint": "eslint . --no-ignore",
+        "dev": "vite && npm run lint && nodemon ./src/app.js",
+        "build": "vite build",
+        "start": "node ./src/app.js"
+    },
+    "keywords": [],
+    "dependencies": {
+        "@builderbot/bot": "1.2.1",
+        "@builderbot/database-mysql": "1.2.1",
+        "@builderbot/provider-meta": "1.2.1",
+        "@woocommerce/woocommerce-rest-api": "^1.0.1",
+        "chalk": "^5.3.0",
+        "morgan": "^1.10.0",
+        "mysql2": "^3.11.0",
+        "openai": "^4.56.0"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.9",
@@ -15,6 +32,11 @@
         "postcss": "^8.4.49",
         "pusher-js": "8.4.0-rc2",
         "tailwindcss": "^3.4.16",
-        "vite": "^5.4.11"
-    }
+        "vite": "^5.4.11",
+        "eslint": "^8.57.0",
+        "eslint-plugin-builderbot": "latest",
+        "nodemon": "^3.1.4"
+    },
+    "author": "",
+    "license": "ISC"
 }

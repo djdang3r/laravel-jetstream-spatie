@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\MediaFile;
 use App\Models\Contact;
 use App\Models\Conversation;
+use App\Models\WhatsappBot;
 use App\Models\WhatsappPhoneNumber;
 use App\Models\WhatsappBusinessAccount;
 
@@ -49,6 +50,9 @@ class WhatsappWebhookController extends Controller
 
             // Registrar el contenido de la solicitud para depuración
             Log::info('Webhook received: ' . print_r($input, true));
+
+            // Reenviar los datos a la URL secundaria
+            $this->reenviarDatos($input);
 
             // Verifica que el mensaje está en el formato esperado
             if (isset($input['entry'][0]['changes'][0]['value']['messages'][0])) {
@@ -203,20 +207,20 @@ class WhatsappWebhookController extends Controller
 
                     // Extrae el ID de la imagen
                     $imageId = $messages['image']['id'];
-                    
+
 
                     $type_message = strtoupper($tipoMensaje);
 
                     // Obtiene la URL del archivo de imagen
                     $mediaUrl = $this->obtenerUrlDeMedia($imageId, $whatsapp_business, $whatsapp_phone);
 
-                    
+
 
                     if ($mediaUrl) {
                         // Realiza una petición para obtener el archivo de imagen
                         $imageContent = $this->obtenerArchivoDeMedia($mediaUrl, $whatsapp_business);
 
-                        
+
 
                         if ($imageContent) {
                             // Asegúrate de que la carpeta exista
@@ -350,7 +354,7 @@ class WhatsappWebhookController extends Controller
                         $message->conversation_id = $conversation->conversation_id;
                         if ($status['status'] === 'delivered') {
                             $message->delivered_at = now();
-                        } 
+                        }
                         $message->save();
                     }
                 } else {
@@ -400,5 +404,33 @@ class WhatsappWebhookController extends Controller
         ])->get($url);
 
         return $response->body();
+    }
+
+    // Función para reenviar los datos a la URL secundaria
+    private function reenviarDatos($input)
+    {
+        Log::error('Reenviando datos');
+        if (isset($input['entry'][0]['changes'][0]['value']['messages'][0])) {
+            $value = $input['entry'][0]['changes'][0]['value'];
+            $metadata = $value['metadata'];
+            $contacts = $value['contacts'][0];
+            $messages = $value['messages'][0];
+
+            $whatsapp_phone = WhatsappPhoneNumber::where('phone_number_id', $metadata['phone_number_id'])->first();
+            $whatsapp_business = WhatsappBusinessAccount::where('whatsapp_business_id', $whatsapp_phone->whatsapp_business_accounts_id)->first();
+            $whatsapp_bot = $whatsapp_phone->bot;
+
+            $url = env('APP_URL') . ':' . $whatsapp_bot->port . '/webhook';
+
+            Log::error('URL reenvio', ['url' => $url]);
+
+            $response = Http::post($url, $input);
+
+            if ($response->failed()) {
+                Log::error('Error al reenviar los datos al segundo webhook', ['response' => $response->body()]);
+            } else {
+                Log::info('Datos reenviados al segundo webhook con éxito');
+            }
+        }
     }
 }
