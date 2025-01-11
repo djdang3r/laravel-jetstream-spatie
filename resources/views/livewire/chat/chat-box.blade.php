@@ -19,6 +19,8 @@
                     <div class="direct-chat-text">
                         @if ($message->message_type === 'TEXT')
                             {{ $message->message_content }}
+                        @elseif ($message->message_type === 'TEMPLATE')
+                            {!! $message->message_content !!}
                         @elseif ($message->message_type === 'AUDIO')
                             @foreach ($message->mediaFiles as $file)
                                 <audio controls>

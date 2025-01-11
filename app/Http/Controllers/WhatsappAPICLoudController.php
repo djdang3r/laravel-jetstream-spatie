@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\Contact;
+use App\Models\Message;
 use App\Models\Template;
 use App\Models\WhatsappBusinessAccount;
 use App\Models\WhatsappPhoneNumber;
@@ -305,27 +307,11 @@ class WhatsappAPICLoudController extends Controller
     public static function renderWhatsAppTemplate($json, $template_id, $wa_template_id)
     {
         $template = json_decode($json, true);
-        $html = '<div class="wb-template col-md-6 col-sm-6 col-12">
+        $html = '<div class="wb-template col-md-8 col-sm-8 col-12">
                     <div class="plantilla-card plantilla-card-header bg-gradient-success">
                         <div class="">
                             <div class="factura-title d-flex justify-content-between align-items-center">
                                 <a>' . htmlspecialchars($template['name']) . '</a>
-                                <!--
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu" role="menu" style="">
-                                        <a class="dropdown-item modal-editTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Editar Plantilla</a>
-                                        <a class="dropdown-item modal-detailTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Detalles de Plantilla</a>
-                                        <a class="dropdown-item modal-sendTemplate" href="#" data-template-name="' . htmlspecialchars($template['name']) . '" data-template-id="' . $template_id . '" data-template-wa-id="' . $wa_template_id . '">Enviar Plantilla</a>
-
-                                        <div class="dropdown-divider"></div>
-
-                                        <a class="dropdown-item modal-deleteTemplate" href="#">Eliminar Plantilla</a>
-                                    </div>
-                                </div>
-                                -->
                             </div>
                         </div>
                     </div>
@@ -336,8 +322,32 @@ class WhatsappAPICLoudController extends Controller
         foreach ($template['components'] as $component) {
             switch ($component['type']) {
                 case 'HEADER':
-                    $headerText = isset($component['text']) ? (isset($component['example']['header_text']) ? self::replaceParameters($component['text'], $component['example']['header_text']) : $component['text']) : '';
-                    $html .= '<div class="plantilla-header"><span>' . $headerText . '</span></div>';
+                    if (isset($component['format'])) {
+                        switch ($component['format']) {
+                            case 'IMAGE':
+                                if (isset($component['example']['header_handle'][0])) {
+                                    $headerImage = $component['example']['header_handle'][0];
+                                    $html .= '<div class="plantilla-header"><img src="' . htmlspecialchars($headerImage) . '" alt="Header Image" style="max-width: 100%; height: auto;"></div>';
+                                }
+                                break;
+                            case 'VIDEO':
+                                if (isset($component['example']['header_handle'][0])) {
+                                    $headerVideo = $component['example']['header_handle'][0];
+                                    $html .= '<div class="plantilla-header"><video controls style="max-width: 100%; height: auto;"><source src="' . htmlspecialchars($headerVideo) . '" type="video/mp4">Your browser does not support the video tag.</video></div>';
+                                }
+                                break;
+                            case 'AUDIO':
+                                if (isset($component['example']['header_handle'][0])) {
+                                    $headerAudio = $component['example']['header_handle'][0];
+                                    $html .= '<div class="plantilla-header"><audio controls style="max-width: 100%; height: auto;"><source src="' . htmlspecialchars($headerAudio) . '" type="audio/mpeg">Your browser does not support the audio element.</audio></div>';
+                                }
+                                break;
+                            default:
+                                $headerText = isset($component['text']) ? (isset($component['example']['header_text']) ? self::replaceParameters($component['text'], $component['example']['header_text']) : $component['text']) : '';
+                                $html .= '<div class="plantilla-header"><span>' . $headerText . '</span></div>';
+                                break;
+                        }
+                    }
                     break;
 
                 case 'BODY':
@@ -392,115 +402,176 @@ class WhatsappAPICLoudController extends Controller
 
                 // Construir el cuerpo de la solicitud
                 $components = [];
-                $mensaje = ""; // Variable para construir el mensaje
 
+                // Procesar HEADER primero
                 foreach ($templateJson['components'] as $component) {
-                    $componentType = strtolower($component['type']);
-                    if ($componentType === 'footer') {
-                        continue; // Ignorar el componente footer
-                    }
-
-                    $componentData = ['type' => $componentType];
-
-                    if (isset($component['text'])) {
-                        $parameters = [];
-                        $matches = [];
-                        preg_match_all('/{{\d+}}/', $component['text'], $matches);
-                        $text = $component['text'];
-                        foreach ($matches[0] as $index => $match) {
-                            $paramValue = $params["param_{$component['type']}_{$index}"] ?? '';
-                            $text = str_replace($match, $paramValue, $text);
-                            $parameters[] = [
-                                'type' => 'text',
-                                'text' => $paramValue
-                            ];
-                        }
-                        $mensaje .= $text . "\n"; // Agregar el texto al mensaje
-                        if (!empty($parameters)) {
-                            $componentData['parameters'] = $parameters;
-                        }
-                        $components[] = $componentData;
-                    } elseif ($componentType === 'buttons' && isset($component['buttons']) && count($component['buttons']) > 0) {
-                        foreach ($component['buttons'] as $buttonIndex => $button) {
-                            $parameters = [];
-                            if (isset($button['url'])) {
-                                $matches = [];
-                                preg_match_all('/{{\d+}}/', $button['url'], $matches);
-                                foreach ($matches[0] as $index => $match) {
-                                    $parameters[] = [
-                                        'type' => 'text',
-                                        'text' => $params["param_BUTTON_{$buttonIndex}_{$index}"] ?? ''
-                                    ];
-                                }
-                            } elseif (isset($button['parameters'])) {
-                                $parameters = $button['parameters'];
+                    if ($component['type'] === 'HEADER') {
+                        $componentData = ['type' => 'header'];
+                        if (isset($component['format'])) {
+                            switch ($component['format']) {
+                                case 'IMAGE':
+                                    if (isset($component['example']['header_handle'][0])) {
+                                        $headerImage = $component['example']['header_handle'][0];
+                                        $componentData['parameters'][] = [
+                                            'type' => 'image',
+                                            'image' => ['link' => $headerImage]
+                                        ];
+                                    }
+                                    break;
+                                case 'VIDEO':
+                                    if (isset($component['example']['header_handle'][0])) {
+                                        $headerVideo = $component['example']['header_handle'][0];
+                                        $componentData['parameters'][] = [
+                                            'type' => 'video',
+                                            'video' => ['link' => $headerVideo]
+                                        ];
+                                    }
+                                    break;
+                                case 'AUDIO':
+                                    if (isset($component['example']['header_handle'][0])) {
+                                        $headerAudio = $component['example']['header_handle'][0];
+                                        $componentData['parameters'][] = [
+                                            'type' => 'audio',
+                                            'audio' => ['link' => $headerAudio]
+                                        ];
+                                    }
+                                    break;
+                                default:
+                                    if (isset($component['text']) && strpos($component['text'], '{{') !== false) {
+                                        $headerText = $component['text'];
+                                        preg_match('/{{(\d+)}}/', $headerText, $match);
+                                        if (isset($match[1])) {
+                                            $paramKey = 'param_HEADER_' . ($match[1] - 1);
+                                            if (isset($params[$paramKey])) {
+                                                $headerText = $params[$paramKey];
+                                                $componentData['parameters'][] = [
+                                                    'type' => 'text',
+                                                    'text' => $headerText
+                                                ];
+                                            }
+                                        }
+                                    }
+                                    break;
                             }
-
-                            $components[] = [
-                                'type' => 'button',
-                                'sub_type' => strtolower($button['type']),
-                                'index' => $buttonIndex,
-                                'parameters' => $parameters
-                            ];
                         }
-                    } elseif (isset($component['parameters'])) {
-                        $componentData['parameters'] = $component['parameters'];
-                        $components[] = $componentData;
-                    } else {
                         $components[] = $componentData;
                     }
                 }
 
-                // Construir el cuerpo de la solicitud JSON
-                $requestBody = [
+                // Procesar BODY y BUTTONS después
+                foreach ($templateJson['components'] as $component) {
+                    if ($component['type'] === 'FOOTER' || $component['type'] === 'HEADER') {
+                        continue; // Omitir el componente FOOTER y HEADER ya procesado
+                    }
+
+                    $componentData = ['type' => strtolower($component['type'])];
+
+                    if (isset($component['text']) && strpos($component['text'], '{{') !== false) {
+                        $componentData['parameters'] = [];
+                        preg_match_all('/{{(\d+)}}/', $component['text'], $matches);
+                        foreach ($matches[1] as $index) {
+                            $paramKey = 'param_' . strtoupper($component['type']) . '_' . ($index - 1);
+                            if (isset($params[$paramKey])) {
+                                $componentData['parameters'][] = [
+                                    'type' => 'text',
+                                    'text' => $params[$paramKey]
+                                ];
+                            }
+                        }
+                    }
+
+                    if ($component['type'] === 'BUTTONS') {
+                        foreach ($component['buttons'] as $index => $button) {
+                            $buttonComponent = [
+                                'type' => 'button',
+                                'sub_type' => $button['type'] === 'URL' ? 'url' : 'quick_reply',
+                                'index' => (string)$index,
+                                'parameters' => []
+                            ];
+                            if ($button['type'] === 'URL') {
+                                $url = $button['url'];
+                                preg_match('/{{(\d+)}}/', $url, $match);
+                                if (isset($match[1])) {
+                                    $paramKey = 'param_BUTTON_0_' . ($match[1] - 1);
+                                    if (isset($params[$paramKey])) {
+                                        // $url = str_replace($match[0], $params[$paramKey], $url);
+                                        $url = $params[$paramKey];
+                                        $buttonComponent['parameters'][] = [
+                                            'type' => 'payload',
+                                            'payload' => $url
+                                        ];
+                                    }
+                                }
+                            }
+                            if (!empty($buttonComponent['parameters'])) {
+                                $components[] = $buttonComponent;
+                            }
+                        }
+                    } else {
+                        if (!empty($componentData['parameters'])) {
+                            $components[] = $componentData;
+                        }
+                    }
+                }
+
+                // Construir el payload para la API de WhatsApp
+                $payload = [
                     'messaging_product' => 'whatsapp',
+                    'recipient_type' => 'individual',
                     'to' => $recipient,
                     'type' => 'template',
                     'template' => [
                         'name' => $templateJson['name'],
                         'language' => [
-                            'code' => $templateJson['language'],
-                            'policy' => 'deterministic'
+                            'code' => $templateJson['language']
                         ],
                         'components' => $components
                     ]
                 ];
 
-                // Enviar la solicitud a la API de WhatsApp
+                // Enviar el mensaje a la API de WhatsApp
                 $apiUrl = env('WHATSAPP_API_URL') . env('WHATSAPP_API_VERSION') . '/' . $wa_account->phone_number_id . '/messages';
-                $apiToken = $wa_account->api_token;
+                $apiToken = $wa_account->businessAccount->api_token;
 
-                // dd($apiUrl, $requestBody);
-                // exit();
+                // Log::debug('WhatsApp API Petition', ['url' => $apiUrl, 'payload' => $payload, 'api_token' => $apiToken]);
 
-                $response = Http::withToken($apiToken)->post($apiUrl, $requestBody);
+                $response = Http::withToken($apiToken)->post($apiUrl, $payload);
+
+                // Log::debug('WhatsApp API Response', ['response' => $response->json()]);
 
                 if ($response->successful()) {
-                    $responseData = $response->json();
-                    if (isset($responseData['messages'][0]['id'])) {
-                        $messageId = $responseData['messages'][0]['id'];
-                        // Guardar el mensaje en la base de datos
-                        DB::table('mensaje_whatsapp')->insert([
-                            'celular' => $recipient,
-                            'mensaje' => $mensaje,
-                            'tipo' => 'SALIDA',
-                            'type' => 'TEMPLATE',
-                            'fechaenvio' => now(),
-                            'wb_message_id' => $messageId
-                        ]);
-                        return response()->json(['success' => 'Mensaje enviado correctamente', 'message_id' => $messageId], 200);
-                    } else {
-                        return response()->json(['error' => 'Error en la respuesta de la API de WhatsApp', 'response' => $responseData], 500);
-                    }
+                    // Almacenar el contacto si no existe
+                    $contact = Contact::firstOrCreate(
+                        ['wa_id' => $recipient],
+                        ['country_code' => $countryCode, 'phone_number' => $phoneNumber]
+                    );
+
+                    // Formatear el payload en HTML
+                    $messageContent = $this->formatPayloadToHtml($payload);
+
+                    // Almacenar el mensaje en la base de datos
+                    $message = new Message();
+                    $message->whatsapp_phone_id = $wa_account->whatsapp_phone_id;
+                    $message->contact_id = $contact->contact_id;
+                    $message->messaging_product = 'whatsapp';
+                    $message->message_type = 'TEMPLATE';
+                    $message->message_method = 'OUTPUT';
+                    $message->message_from = $wa_account->display_phone_number;
+                    $message->message_to = $recipient;
+                    $message->wa_id = $response->json('messages')[0]['id'];
+                    $message->message_content = $messageContent; // Almacenar el HTML formateado
+                    $message->json_content = json_encode($payload); // Almacenar el JSON enviado a la API
+                    $message->json = $response->body(); // Almacenar la respuesta de la API
+                    $message->save();
+
+                    return response()->json(['message' => 'Mensaje enviado con éxito.'], 200);
                 } else {
                     return response()->json(['error' => $response->json()], $response->status());
                 }
-            } else {
-                return response()->json(['error' => 'Plantilla no encontrada'], 404);
             }
-        } else {
-            return response()->json(['error' => 'Datos incompletos para enviar la plantilla'], 400);
         }
+
+        return response()->json(['error' => 'Datos incompletos.'], 400);
     }
 
     public static function replaceParameters($text, $parameters)
@@ -510,5 +581,32 @@ class WhatsappAPICLoudController extends Controller
             $text = str_replace($placeholder, htmlspecialchars($param), $text);
         }
         return $text;
+    }
+
+    private function formatPayloadToHtml($payload)
+    {
+        $html = '<div class="whatsapp-message">';
+        $html .= '<p><strong>To:</strong> ' . htmlspecialchars($payload['to']) . '</p>';
+        $html .= '<p><strong>Template:</strong> ' . htmlspecialchars($payload['template']['name']) . '</p>';
+        $html .= '<p><strong>Language:</strong> ' . htmlspecialchars($payload['template']['language']['code']) . '</p>';
+
+        foreach ($payload['template']['components'] as $component) {
+            $html .= '<div class="component">';
+            $html .= '<p><strong>Type:</strong> ' . htmlspecialchars($component['type']) . '</p>';
+            if (isset($component['parameters'])) {
+                foreach ($component['parameters'] as $parameter) {
+                    $html .= '<p><strong>Parameter:</strong> ' . htmlspecialchars($parameter['type']) . ' - ' . htmlspecialchars($parameter['text'] ?? $parameter['payload'] ?? '') . '</p>';
+                }
+            }
+            if (isset($component['buttons'])) {
+                foreach ($component['buttons'] as $button) {
+                    $html .= '<p><strong>Button:</strong> ' . htmlspecialchars($button['sub_type']) . ' - ' . htmlspecialchars($button['parameters'][0]['payload'] ?? '') . '</p>';
+                }
+            }
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+        return $html;
     }
 }
