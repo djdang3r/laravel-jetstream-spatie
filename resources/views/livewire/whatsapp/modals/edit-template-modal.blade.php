@@ -15,7 +15,7 @@
                     <div class="form-group mb-3">
                         <label for="editTemplateName">Nombre de la Plantilla</label>
                         <input type="text" id="editTemplateName" name="editTemplateName" class="form-control"
-                            maxlength="512">
+                            maxlength="512" readonly>
                         <input type="hidden" id="editTemplateId" name="editTemplateId">
                         <input type="hidden" id="editTemplateWabaId" name="editTemplateWabaId">
                         <input type="hidden" id="editCategory" name="editCategory">
@@ -146,7 +146,7 @@
                             </div>
                         </div>
 
-                        <div class="buttons_groug">
+                        <div class="buttons_group">
 
                         </div>
                     </div>

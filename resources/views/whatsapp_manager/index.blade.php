@@ -147,13 +147,32 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const buttonsContainer = document.querySelector('.buttons_groug');
+            const createTemplateNameField = document.getElementById('createTemplateName');
+            const headerTextFields = document.querySelectorAll("#editHeaderText, #createHeaderText");
+            const bodyTextFields = document.querySelectorAll("#editBodyText, #createBodyText");
+            const footerTextFields = document.querySelectorAll("#editFooterText, #createFooterText");
+            const buttonsContainer = document.querySelector('.buttons_group');
+            const buttonsCreateContainer = document.querySelector('.create_buttons_group');
+
+            // Funcionalidad para los campos de nombre de plantilla (sin variables)
+            const templateNameFields = document.querySelectorAll("#createTemplateName, #editTemplateName");
+            templateNameFields.forEach((templateField) => {
+                templateField.addEventListener("input", function () {
+                    // Convertir a minúsculas y reemplazar espacios por _
+                    this.value = this.value.toLowerCase().replace(/\s+/g, '_');
+                });
+            });
 
             // Ocultar los campos de archivo al cargar la página
             $('#headerTextGroup').hide();
             $('#headerImageGroup').hide();
             $('#headerVideoGroup').hide();
             $('#headerDocumentGroup').hide();
+
+            $('#createHeaderTextGroup').hide();
+            $('#createHeaderImageGroup').hide();
+            $('#createHeaderVideoGroup').hide();
+            $('#createHeaderDocumentGroup').hide();
 
             // Mostrar/ocultar los campos de archivo según el valor del select
             $('#editTemplateHeader').on('change', function () {
@@ -172,6 +191,25 @@
                     $('#headerVideoGroup').show();
                 } else if (selectedValue === 'DOCUMENT') {
                     $('#headerDocumentGroup').show();
+                }
+            });
+
+            $('#createTemplateHeader').on('change', function () {
+                var selectedValue = $(this).val();
+                // alert(selectedValue);
+                $('#createHeaderTextGroup').hide();
+                $('#createHeaderImageGroup').hide();
+                $('#createHeaderVideoGroup').hide();
+                $('#createHeaderDocumentGroup').hide();
+
+                if (selectedValue === 'TEXT') {
+                    $('#createHeaderTextGroup').show();
+                } else if (selectedValue === 'IMAGE') {
+                    $('#createHeaderImageGroup').show();
+                } else if (selectedValue === 'VIDEO') {
+                    $('#createHeaderVideoGroup').show();
+                } else if (selectedValue === 'DOCUMENT') {
+                    $('#createHeaderDocumentGroup').show();
                 }
             });
 
@@ -226,6 +264,28 @@
                 }
             });
 
+            $(document).on('input', '#createHeaderText', function () {
+                var text = $(this).val();
+                var variablePattern = /@{{\s*([\w_]+)\s*}}/g;
+                var match;
+                var variables = [];
+
+                // Detectar variables en el texto
+                while ((match = variablePattern.exec(text)) !== null) {
+                    variables.push(match[1]);
+                }
+
+                // Limpiar campos de variables existentes
+                $('#createVariableFields').empty();
+
+                // Crear campos de texto para cada variable detectada
+                if (variables.length <= 1) {
+                    variables.forEach(function (variable) {
+                        createExampleField($('#createHeaderText')[0], variable);
+                    });
+                }
+            });
+
             // Completar automáticamente las variables
             $(document).on('keyup', '#editHeaderText', function (e) {
                 if (e.key === '{') {
@@ -237,6 +297,24 @@
                     if (beforeCursor.endsWith('@{{')) {
                         var variableType = $('#editTemplateVariable').val();
                         var variableCount = $('#variableFields .form-group').length + 1;
+                        var variableName = variableType === 'number' ? variableCount : 'variable_' + variableCount;
+
+                        $(this).val(beforeCursor + variableName + '}}' + afterCursor);
+                        this.selectionStart = this.selectionEnd = cursorPos + variableName.length + 2;
+                    }
+                }
+            });
+
+            $(document).on('keyup', '#createHeaderText', function (e) {
+                if (e.key === '{') {
+                    var cursorPos = this.selectionStart;
+                    var text = $(this).val();
+                    var beforeCursor = text.substring(0, cursorPos);
+                    var afterCursor = text.substring(cursorPos);
+
+                    if (beforeCursor.endsWith('@{{')) {
+                        var variableType = $('#createTemplateVariable').val();
+                        var variableCount = $('#createVariableFields .form-group').length + 1;
                         var variableName = variableType === 'number' ? variableCount : 'variable_' + variableCount;
 
                         $(this).val(beforeCursor + variableName + '}}' + afterCursor);
@@ -292,23 +370,6 @@
                 }
             }
 
-            // Inicializar los campos de texto del encabezado
-            const headerTextFields = document.querySelectorAll("#editHeaderText, #createHeaderText");
-
-            headerTextFields.forEach((headerText) => {
-                const validationMessage = document.createElement("small");
-                validationMessage.classList.add("form-text", "text-danger");
-                validationMessage.style.display = "none";
-                validationMessage.innerText = "El encabezado solo puede contener un parámetro variable.";
-                headerText.parentNode.appendChild(validationMessage);
-
-                headerText.addEventListener("input", function () {
-                    autoInsertVariable(headerText);
-                    validateHeaderText(headerText, validationMessage);
-                    updateExampleField(headerText); // Actualizar el campo de ejemplo en la entrada
-                });
-            });
-
             // Función para insertar automáticamente la variable
             function autoInsertVariable(field) {
                 const cursorPosition = field.selectionStart;
@@ -348,6 +409,28 @@
                 callToActionButtonGroups.forEach(group => group.remove());
             }
 
+            // Function to clear form fields
+            function clearCreateFormFields() {
+                // Clear input fields
+                document.getElementById('createTemplateName').value = '';
+                document.getElementById('createTemplateLanguage').value = '';
+                document.getElementById('createTemplateId').value = '';
+                document.getElementById('createHeaderText').value = '';
+                document.getElementById('createBodyText').value = '';
+                document.getElementById('createFooterText').value = '';
+
+                // Remove dynamically created example fields
+                const exampleFields = document.querySelectorAll('.example-field');
+                exampleFields.forEach(field => field.remove());
+
+                // Remove dynamically created buttons
+                const quickReplyButtonGroups = document.querySelectorAll('.create_quick_replay_button_group');
+                quickReplyButtonGroups.forEach(group => group.remove());
+
+                const callToActionButtonGroups = document.querySelectorAll('.create_call_to_action_button_group');
+                callToActionButtonGroups.forEach(group => group.remove());
+            }
+
             // Function to add Quick Reply Button
             function addQuickReplyButton(type, text = '') {
                 const quickReplyButtonGroup = document.createElement('div');
@@ -379,6 +462,65 @@
                 buttonsContainer.appendChild(quickReplyButtonGroup);
             }
 
+            function addQuickReplyButtonCreate(type, text = '') {
+                const quickReplyButtonGroup = document.createElement('div');
+                quickReplyButtonGroup.classList.add('create_quick_replay_button_group');
+
+                quickReplyButtonGroup.innerHTML = `
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label for="quick_replay_button_type">Type</label>
+                                <select class="custom-select form-control-border" name="quick_replay_button_type">
+                                    <option value="QUICK_REPLY" ${type === 'Personalizado' ? 'selected' : ''}>Personalizado</option>
+                                    <option value="QUICK_REPLY" ${type === 'Respuesta preconfigurada' ? 'selected' : ''}>Respuesta preconfigurada</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="form-group">
+                                <label for="quick_replay_button_text">Texto del Boton</label>
+                                <input type="text" class="form-control" name="quick_replay_button_text" value="${text}">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+
+                buttonsCreateContainer.appendChild(quickReplyButtonGroup);
+            }
+
+            // function addQuickReplyButton(type) {
+            //     const quickReplyButtonGroup = document.createElement('div');
+            //     quickReplyButtonGroup.classList.add('quick_replay_button_group');
+
+            //     quickReplyButtonGroup.innerHTML = `
+            //         <div class="row">
+            //             <div class="col-lg-3">
+            //                 <div class="form-group">
+            //                     <label for="quick_replay_button_type">Type</label>
+            //                     <select class="custom-select form-control-border" name="quick_replay_button_type">
+            //                         <option value="QUICK_REPLY" ${type === 'Personalizado' ? 'selected' : ''}>Personalizado</option>
+            //                         <option value="QUICK_REPLY" ${type === 'Respuesta preconfigurada' ? 'selected' : ''}>Respuesta preconfigurada</option>
+            //                     </select>
+            //                 </div>
+            //             </div>
+            //             <div class="col-lg-7">
+            //                 <div class="form-group">
+            //                     <label for="quick_replay_button_text">Texto del Boton</label>
+            //                     <input type="text" class="form-control" name="quick_replay_button_text">
+            //                 </div>
+            //             </div>
+            //             <div class="col-lg-2">
+            //                 <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
+            //             </div>
+            //         </div>
+            //     `;
+
+            //     buttonsContainer.appendChild(quickReplyButtonGroup);
+            // }
             // Function to add Call to Action Button
             function addCallToActionButton(actionType, text = '', url = '', phoneNumber = '', code = '') {
                 const callToActionButtonGroup = document.createElement('div');
@@ -397,7 +539,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                             <div class="form-group">
                                 <label for="call_to_action_button_url">URL del sitio web</label>
                                 <input type="text" class="form-control" name="call_to_action_button_url" value="${url}">
@@ -423,7 +565,7 @@
                     `;
                 } else if (actionType === 'Copiar codigo de oferta') {
                     actionFields = `
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <div class="form-group">
                                 <label for="call_to_action_button_code">Codigo de oferta</label>
                                 <input type="text" class="form-control" name="call_to_action_button_code" value="${code}">
@@ -444,7 +586,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                             <div class="form-group">
                                 <label for="call_to_action_button_text">Texto del Boton</label>
                                 <input type="text" class="form-control" name="call_to_action_button_text" value="${text}">
@@ -459,6 +601,303 @@
 
                 buttonsContainer.appendChild(callToActionButtonGroup);
             }
+
+            function addCallToActionButtonCreate(actionType, text = '', url = '', phoneNumber = '', code = '') {
+                const callToActionButtonGroup = document.createElement('div');
+                callToActionButtonGroup.classList.add('call_to_action_button_group');
+
+                let actionFields = '';
+
+                if (actionType === 'Ir a Web') {
+                    actionFields = `
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label for="call_to_action_button_type">URL Type</label>
+                                <select class="custom-select form-control-border" name="call_to_action_button_type">
+                                    <option>Estatica</option>
+                                    <option>Dinamica</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label for="call_to_action_button_url">URL del sitio web</label>
+                                <input type="text" class="form-control" name="call_to_action_button_url" value="${url}">
+                            </div>
+                        </div>
+                    `;
+                } else if (actionType === 'Llamar a numero de telefono') {
+                    actionFields = `
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label for="call_to_action_button_country">Pais</label>
+                                <select class="custom-select form-control-border" name="call_to_action_button_country">
+                                    <option>+57</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="call_to_action_button_phone">Numero de telefono</label>
+                                <input type="text" class="form-control" name="call_to_action_button_phone" value="${phoneNumber}">
+                            </div>
+                        </div>
+                    `;
+                } else if (actionType === 'Copiar codigo de oferta') {
+                    actionFields = `
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="call_to_action_button_code">Codigo de oferta</label>
+                                <input type="text" class="form-control" name="call_to_action_button_code" value="${code}">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                callToActionButtonGroup.innerHTML = `
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label for="call_to_action_button_type">Tipo de accion</label>
+                                <select class="custom-select form-control-border" name="call_to_action_button_type">
+                                    <option value="URL" ${actionType === 'Ir a Web' ? 'selected' : ''}>Ir a Web</option>
+                                    <option value="PHONE_NUMBER" ${actionType === 'Llamar a numero de telefono' ? 'selected' : ''}>Llamar a numero de telefono</option>
+                                    <option value="COPY_CODE" ${actionType === 'Copiar codigo de oferta' ? 'selected' : ''}>Copiar codigo de oferta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label for="call_to_action_button_text">Texto del Boton</label>
+                                <input type="text" class="form-control" name="call_to_action_button_text" value="${text}">
+                            </div>
+                        </div>
+                        ${actionFields}
+                        <div class="col-lg-2">
+                            <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+
+                buttonsCreateContainer.appendChild(callToActionButtonGroup);
+            }
+
+            // function addCallToActionButton(actionType) {
+            //     const callToActionButtonGroup = document.createElement('div');
+            //     callToActionButtonGroup.classList.add('call_to_action_button_group');
+
+            //     let actionFields = '';
+
+            //     if (actionType === 'Ir a Web') {
+            //         actionFields = `
+            //             <div class="col-lg-2">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_type">URL Type</label>
+            //                     <select class="custom-select form-control-border" name="call_to_action_button_type">
+            //                         <option>Estatica</option>
+            //                         <option>Dinamica</option>
+            //                     </select>
+            //                 </div>
+            //             </div>
+            //             <div class="col-lg-4">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_url">URL del sitio web</label>
+            //                     <input type="text" class="form-control" name="call_to_action_button_url">
+            //                 </div>
+            //             </div>
+            //         `;
+            //     } else if (actionType === 'Llamar a numero de telefono') {
+            //         actionFields = `
+            //             <div class="col-lg-2">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_country">Pais</label>
+            //                     <select class="custom-select form-control-border" name="call_to_action_button_country">
+            //                         <option>+57</option>
+            //                     </select>
+            //                 </div>
+            //             </div>
+            //             <div class="col-lg-4">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_phone">Numero de telefono</label>
+            //                     <input type="text" class="form-control" name="call_to_action_button_phone">
+            //                 </div>
+            //             </div>
+            //         `;
+            //     } else if (actionType === 'Copiar codigo de oferta') {
+            //         actionFields = `
+            //             <div class="col-lg-6">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_code">Codigo de oferta</label>
+            //                     <input type="text" class="form-control" name="call_to_action_button_code">
+            //                 </div>
+            //             </div>
+            //         `;
+            //     }
+
+            //     callToActionButtonGroup.innerHTML = `
+            //         <div class="row">
+            //             <div class="col-lg-2">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_type">Tipo de accion</label>
+            //                     <select class="custom-select form-control-border" name="call_to_action_button_type">
+            //                         <option value="URL" ${actionType === 'Ir a Web' ? 'selected' : ''}>Ir a Web</option>
+            //                         <option value="PHONE_NUMBER" ${actionType === 'Llamar a numero de telefono' ? 'selected' : ''}>Llamar a numero de telefono</option>
+            //                         <option value="COPY_CODE" ${actionType === 'Copiar codigo de oferta' ? 'selected' : ''}>Copiar codigo de oferta</option>
+            //                     </select>
+            //                 </div>
+            //             </div>
+            //             <div class="col-lg-4">
+            //                 <div class="form-group">
+            //                     <label for="call_to_action_button_text">Texto del Boton</label>
+            //                     <input type="text" class="form-control" name="call_to_action_button_text">
+            //                 </div>
+            //             </div>
+            //             ${actionFields}
+            //             <div class="col-lg-2">
+            //                 <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
+            //             </div>
+            //         </div>
+            //     `;
+
+            //     buttonsContainer.appendChild(callToActionButtonGroup);
+            // }
+
+            createTemplateNameField.addEventListener('input', function () {
+                // Convertir a minúsculas
+                let value = this.value.toLowerCase();
+
+                // Reemplazar espacios con guiones bajos
+                value = value.replace(/\s+/g, '_');
+
+                // Eliminar caracteres que no sean letras o números
+                value = value.replace(/[^a-z0-9_]/g, '');
+
+                // Asignar el valor modificado al campo
+                this.value = value;
+            });
+            // Inicializar los campos de texto del encabezado
+            headerTextFields.forEach((headerText) => {
+                const validationMessage = document.createElement("small");
+                validationMessage.classList.add("form-text", "text-danger");
+                validationMessage.style.display = "none";
+                validationMessage.innerText = "El encabezado solo puede contener un parámetro variable.";
+                headerText.parentNode.appendChild(validationMessage);
+
+                headerText.addEventListener("input", function () {
+                    autoInsertVariable(headerText);
+                    validateHeaderText(headerText, validationMessage);
+                    updateExampleField(headerText); // Actualizar el campo de ejemplo en la entrada
+                });
+            });
+
+            bodyTextFields.forEach((bodyText) => {
+                const validationMessage = document.createElement("small");
+                validationMessage.classList.add("form-text", "text-danger");
+                validationMessage.style.display = "none";
+                validationMessage.innerText = "Esta plantilla contiene demasiados parámetros variables en relación con la longitud del mensaje. Debes disminuir el número de parámetros o aumentar la longitud del mensaje.";
+                bodyText.parentNode.appendChild(validationMessage);
+
+                // Function to manage example fields
+                function updateExampleFields() {
+                    // Remove existing example fields
+                    const existingExamples = bodyText.parentNode.querySelectorAll('.example-field');
+                    existingExamples.forEach(field => field.remove());
+
+                    // Count the number of variables in the body text
+                    const variablesCount = (bodyText.value.match(/@{{\d+}}/g) || []).length;
+
+                    // Create new example fields based on the count
+                    for (let i = 1; i <= variablesCount; i++) {
+                        createExampleField(i);
+                    }
+                }
+
+                // Function to create an example field
+                function createExampleField(variableNumber) {
+                    const exampleField = document.createElement('input');
+                    exampleField.type = 'text';
+                    exampleField.placeholder = `Ejemplo para @{{${variableNumber}}}`;
+                    exampleField.classList.add('form-control', 'mb-2', 'example-field'); // Add classes for styling
+                    bodyText.parentNode.appendChild(exampleField);
+                }
+
+                bodyText.addEventListener("input", function () {
+                    autoInsertVariable(bodyText);
+                    validateBodyText(bodyText, validationMessage);
+                    updateExampleFields(); // Update example fields on input
+                });
+
+                function autoInsertVariable(field) {
+                    const cursorPosition = field.selectionStart;
+                    const textBeforeCursor = field.value.slice(0, cursorPosition);
+                    const textAfterCursor = field.value.slice(cursorPosition);
+
+                    // Detect opening of `@{{` without a consecutive number
+                    if (textBeforeCursor.endsWith("@{{") && !textAfterCursor.startsWith("}}")) {
+                        const variables = field.value.match(/@{{(\d+)}}/g) || [];
+                        const existingNumbers = variables.map(v => parseInt(v.match(/\d+/)[0], 10));
+                        const nextVariableNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+
+                        // Determine the variable type based on the select value
+                        const variableType = document.getElementById('editTemplateVariable').value;
+                        const variableName = variableType === 'number' ? nextVariableNumber : `variable_${nextVariableNumber}`;
+
+                        // Insert new variable `@{{variableName}}`
+                        field.value = `${textBeforeCursor}@{{${variableName}}}${textAfterCursor}`;
+                        field.selectionStart = field.selectionEnd = cursorPosition + `@{{${variableName}}}`.length;
+
+                        // Update example fields
+                        updateExampleFields();
+                    }
+                }
+
+                function validateBodyText(bodyText, validationMessage) {
+                    const text = bodyText.value;
+                    const cleanText = text.replace(/@{{\d+}}/g, '').trim();
+                    const wordsCount = cleanText.split(/\s+/).filter(Boolean).length;
+                    const variablesCount = (text.match(/@{{\d+}}/g) || []).length;
+
+                    let minWordsRequired;
+                    switch (variablesCount) {
+                        case 1: minWordsRequired = 2; break;
+                        case 2: minWordsRequired = 5; break;
+                        case 3: minWordsRequired = 7; break;
+                        case 4: minWordsRequired = 9; break;
+                        case 5: minWordsRequired = 11; break;
+                        default: minWordsRequired = 0;
+                    }
+
+                    validationMessage.style.display = variablesCount > 0 && wordsCount < minWordsRequired ? "block" : "none";
+                }
+            });
+
+            footerTextFields.forEach((footerText) => {
+                const validationMessage = document.createElement("small");
+                validationMessage.classList.add("form-text", "text-danger");
+                validationMessage.style.display = "none";
+                validationMessage.innerText = "El pie de página no debe contener variables y debe tener un máximo de 60 caracteres.";
+                footerText.parentNode.appendChild(validationMessage);
+
+                // Function to validate footer text
+                function validateFooterText() {
+                    const text = footerText.value;
+
+                    // Check if the text contains any variable (like {{1}})
+                    const hasVariable = /@{{\d+}}/.test(text);
+                    const exceedsMaxLength = text.length > 60;
+
+                    // Show validation message if either condition is violated
+                    if (hasVariable || exceedsMaxLength) {
+                        validationMessage.style.display = "block";
+                    } else {
+                        validationMessage.style.display = "none";
+                    }
+                }
+
+                footerText.addEventListener("input", function () {
+                    validateFooterText(); // Validate on input
+                });
+            });
 
             // Event listeners for dropdown items
             document.getElementById('quick_replay_button').addEventListener('click', function () {
@@ -481,12 +920,45 @@
                 addCallToActionButton('Copiar codigo de oferta');
             });
 
+
+
+
+
+
+
+            document.getElementById('create_quick_replay_button').addEventListener('click', function () {
+                addQuickReplyButtonCreate('Respuesta preconfigurada');
+            });
+
+            document.getElementById('create_quick_replay_custon_button').addEventListener('click', function () {
+                addQuickReplyButtonCreate('Personalizado');
+            });
+
+            document.getElementById('create_go_to_web_button').addEventListener('click', function () {
+                addCallToActionButtonCreate('Ir a Web');
+            });
+
+            document.getElementById('create_call_button').addEventListener('click', function () {
+                addCallToActionButtonCreate('Llamar a numero de telefono');
+            });
+
+            document.getElementById('create_copy_code_button').addEventListener('click', function () {
+                addCallToActionButtonCreate('Copiar codigo de oferta');
+            });
+
             // Event delegation for remove buttons
             buttonsContainer.addEventListener('click', function (e) {
                 if (e.target.classList.contains('remove-button')) {
                     e.target.closest('.row').remove();
                 }
             });
+
+            buttonsCreateContainer.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-button')) {
+                    e.target.closest('.row').remove();
+                }
+            });
+
 
             // Function to open edit modal and load data
             function openEditModal(button) {
@@ -586,289 +1058,6 @@
                     }
                 });
             }
-
-            // Función para limpiar los campos del formulario
-            // function clearFormFields() {
-            //     document.getElementById('editTemplateForm').reset();
-            //     $('#variableFields').empty();
-            // }
-
-            // Delegación de eventos para abrir el modal de edición
-
-
-            $(document).on('click', '.modal-editTemplate', function () {
-                openEditModal(this);
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const bodyTextFields = document.querySelectorAll("#editBodyText, #createBodyText");
-
-            // Funcionalidad para los campos de nombre de plantilla (sin variables)
-            const templateNameFields = document.querySelectorAll("#createTemplateName, #editTemplateName");
-            templateNameFields.forEach((templateField) => {
-                templateField.addEventListener("input", function () {
-                    // Convertir a minúsculas y reemplazar espacios por _
-                    this.value = this.value.toLowerCase().replace(/\s+/g, '_');
-                });
-            });
-
-            bodyTextFields.forEach((bodyText) => {
-                const validationMessage = document.createElement("small");
-                validationMessage.classList.add("form-text", "text-danger");
-                validationMessage.style.display = "none";
-                validationMessage.innerText = "Esta plantilla contiene demasiados parámetros variables en relación con la longitud del mensaje. Debes disminuir el número de parámetros o aumentar la longitud del mensaje.";
-                bodyText.parentNode.appendChild(validationMessage);
-
-                // Function to manage example fields
-                function updateExampleFields() {
-                    // Remove existing example fields
-                    const existingExamples = bodyText.parentNode.querySelectorAll('.example-field');
-                    existingExamples.forEach(field => field.remove());
-
-                    // Count the number of variables in the body text
-                    const variablesCount = (bodyText.value.match(/@{{\d+}}/g) || []).length;
-
-                    // Create new example fields based on the count
-                    for (let i = 1; i <= variablesCount; i++) {
-                        createExampleField(i);
-                    }
-                }
-
-                // Function to create an example field
-                function createExampleField(variableNumber) {
-                    const exampleField = document.createElement('input');
-                    exampleField.type = 'text';
-                    exampleField.placeholder = `Ejemplo para @{{${variableNumber}}}`;
-                    exampleField.classList.add('form-control', 'mb-2', 'example-field'); // Add classes for styling
-                    bodyText.parentNode.appendChild(exampleField);
-                }
-
-                bodyText.addEventListener("input", function () {
-                    autoInsertVariable(bodyText);
-                    validateBodyText(bodyText, validationMessage);
-                    updateExampleFields(); // Update example fields on input
-                });
-
-                function autoInsertVariable(field) {
-                    const cursorPosition = field.selectionStart;
-                    const textBeforeCursor = field.value.slice(0, cursorPosition);
-                    const textAfterCursor = field.value.slice(cursorPosition);
-
-                    // Detect opening of `@{{` without a consecutive number
-                    if (textBeforeCursor.endsWith("@{{") && !textAfterCursor.startsWith("}}")) {
-                        const variables = field.value.match(/@{{(\d+)}}/g) || [];
-                        const existingNumbers = variables.map(v => parseInt(v.match(/\d+/)[0], 10));
-                        const nextVariableNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
-
-                        // Determine the variable type based on the select value
-                        const variableType = document.getElementById('editTemplateVariable').value;
-                        const variableName = variableType === 'number' ? nextVariableNumber : `variable_${nextVariableNumber}`;
-
-                        // Insert new variable `@{{variableName}}`
-                        field.value = `${textBeforeCursor}@{{${variableName}}}${textAfterCursor}`;
-                        field.selectionStart = field.selectionEnd = cursorPosition + `@{{${variableName}}}`.length;
-
-                        // Update example fields
-                        updateExampleFields();
-                    }
-                }
-
-                function validateBodyText(bodyText, validationMessage) {
-                    const text = bodyText.value;
-                    const cleanText = text.replace(/@{{\d+}}/g, '').trim();
-                    const wordsCount = cleanText.split(/\s+/).filter(Boolean).length;
-                    const variablesCount = (text.match(/@{{\d+}}/g) || []).length;
-
-                    let minWordsRequired;
-                    switch (variablesCount) {
-                        case 1: minWordsRequired = 2; break;
-                        case 2: minWordsRequired = 5; break;
-                        case 3: minWordsRequired = 7; break;
-                        case 4: minWordsRequired = 9; break;
-                        case 5: minWordsRequired = 11; break;
-                        default: minWordsRequired = 0;
-                    }
-
-                    validationMessage.style.display = variablesCount > 0 && wordsCount < minWordsRequired ? "block" : "none";
-                }
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const footerTextFields = document.querySelectorAll("#editFooterText, #createFooterText");
-
-            footerTextFields.forEach((footerText) => {
-                const validationMessage = document.createElement("small");
-                validationMessage.classList.add("form-text", "text-danger");
-                validationMessage.style.display = "none";
-                validationMessage.innerText = "El pie de página no debe contener variables y debe tener un máximo de 60 caracteres.";
-                footerText.parentNode.appendChild(validationMessage);
-
-                // Function to validate footer text
-                function validateFooterText() {
-                    const text = footerText.value;
-
-                    // Check if the text contains any variable (like {{1}})
-                    const hasVariable = /@{{\d+}}/.test(text);
-                    const exceedsMaxLength = text.length > 60;
-
-                    // Show validation message if either condition is violated
-                    if (hasVariable || exceedsMaxLength) {
-                        validationMessage.style.display = "block";
-                    } else {
-                        validationMessage.style.display = "none";
-                    }
-                }
-
-                footerText.addEventListener("input", function () {
-                    validateFooterText(); // Validate on input
-                });
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const buttonsContainer = document.querySelector('.buttons_groug');
-
-            // Function to add Quick Reply Button
-            function addQuickReplyButton(type) {
-                const quickReplyButtonGroup = document.createElement('div');
-                quickReplyButtonGroup.classList.add('quick_replay_button_group');
-
-                quickReplyButtonGroup.innerHTML = `
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <div class="form-group">
-                                <label for="quick_replay_button_type">Type</label>
-                                <select class="custom-select form-control-border" name="quick_replay_button_type">
-                                    <option value="QUICK_REPLY" ${type === 'Personalizado' ? 'selected' : ''}>Personalizado</option>
-                                    <option value="QUICK_REPLY" ${type === 'Respuesta preconfigurada' ? 'selected' : ''}>Respuesta preconfigurada</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-7">
-                            <div class="form-group">
-                                <label for="quick_replay_button_text">Texto del Boton</label>
-                                <input type="text" class="form-control" name="quick_replay_button_text">
-                            </div>
-                        </div>
-                        <div class="col-lg-2">
-                            <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
-                        </div>
-                    </div>
-                `;
-
-                buttonsContainer.appendChild(quickReplyButtonGroup);
-            }
-
-            // Function to add Call to Action Button
-            function addCallToActionButton(actionType) {
-                const callToActionButtonGroup = document.createElement('div');
-                callToActionButtonGroup.classList.add('call_to_action_button_group');
-
-                let actionFields = '';
-
-                if (actionType === 'Ir a Web') {
-                    actionFields = `
-                        <div class="col-lg-2">
-                            <div class="form-group">
-                                <label for="call_to_action_button_type">URL Type</label>
-                                <select class="custom-select form-control-border" name="call_to_action_button_type">
-                                    <option>Estatica</option>
-                                    <option>Dinamica</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="call_to_action_button_url">URL del sitio web</label>
-                                <input type="text" class="form-control" name="call_to_action_button_url">
-                            </div>
-                        </div>
-                    `;
-                } else if (actionType === 'Llamar a numero de telefono') {
-                    actionFields = `
-                        <div class="col-lg-2">
-                            <div class="form-group">
-                                <label for="call_to_action_button_country">Pais</label>
-                                <select class="custom-select form-control-border" name="call_to_action_button_country">
-                                    <option>+57</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="call_to_action_button_phone">Numero de telefono</label>
-                                <input type="text" class="form-control" name="call_to_action_button_phone">
-                            </div>
-                        </div>
-                    `;
-                } else if (actionType === 'Copiar codigo de oferta') {
-                    actionFields = `
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="call_to_action_button_code">Codigo de oferta</label>
-                                <input type="text" class="form-control" name="call_to_action_button_code">
-                            </div>
-                        </div>
-                    `;
-                }
-
-                callToActionButtonGroup.innerHTML = `
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <div class="form-group">
-                                <label for="call_to_action_button_type">Tipo de accion</label>
-                                <select class="custom-select form-control-border" name="call_to_action_button_type">
-                                    <option value="URL" ${actionType === 'Ir a Web' ? 'selected' : ''}>Ir a Web</option>
-                                    <option value="PHONE_NUMBER" ${actionType === 'Llamar a numero de telefono' ? 'selected' : ''}>Llamar a numero de telefono</option>
-                                    <option value="COPY_CODE" ${actionType === 'Copiar codigo de oferta' ? 'selected' : ''}>Copiar codigo de oferta</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label for="call_to_action_button_text">Texto del Boton</label>
-                                <input type="text" class="form-control" name="call_to_action_button_text">
-                            </div>
-                        </div>
-                        ${actionFields}
-                        <div class="col-lg-2">
-                            <button type="button" class="btn btn-danger btn-sm remove-button">Eliminar</button>
-                        </div>
-                    </div>
-                `;
-
-                buttonsContainer.appendChild(callToActionButtonGroup);
-            }
-
-            // Event listeners for dropdown items
-            document.getElementById('quick_replay_button').addEventListener('click', function () {
-                addQuickReplyButton('Respuesta preconfigurada');
-            });
-
-            document.getElementById('quick_replay_custon_button').addEventListener('click', function () {
-                addQuickReplyButton('Personalizado');
-            });
-
-            document.getElementById('go_to_web_button').addEventListener('click', function () {
-                addCallToActionButton('Ir a Web');
-            });
-
-            document.getElementById('call_button').addEventListener('click', function () {
-                addCallToActionButton('Llamar a numero de telefono');
-            });
-
-            document.getElementById('copy_code_button').addEventListener('click', function () {
-                addCallToActionButton('Copiar codigo de oferta');
-            });
-
-            // Event delegation for remove buttons
-            buttonsContainer.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-button')) {
-                    e.target.closest('.row').remove();
-                }
-            });
 
             // Function to submit the edit template form
             function submitEditTemplateForm(event) {
@@ -1012,10 +1201,161 @@
             document.getElementById('editTemplateForm').addEventListener('submit', submitEditTemplateForm);
 
 
+            // Function to submit the create template form
+            function submitCreateTemplateForm(event) {
+                event.preventDefault();
+
+                // Obtener los valores del formulario
+                const templateName = document.getElementById('createTemplateName').value;
+                const templateLanguage = document.getElementById('createTemplateLanguage').value;
+                const templateCategory = document.getElementById('createTemplateCategory').value;
+                const headerText = document.getElementById('createHeaderText').value;
+                const bodyText = document.getElementById('createBodyText').value;
+                const footerText = document.getElementById('createFooterText').value;
+                const apiVersion = 'v21.0';
+
+                // Construir la estructura del JSON
+                const jsonBody = {
+                    name: templateName,
+                    components: [],
+                    language: templateLanguage,
+                    category: templateCategory
+                };
+
+                // Agregar HEADER si está presente
+                if (headerText) {
+                    const headerComponent = {
+                        type: "HEADER",
+                        format: "TEXT",
+                        text: headerText
+                    };
+
+                    // Verificar si el HEADER contiene un único comodín
+                    const matches = headerText.match(/\{\{\d+\}\}/g);
+                    if (matches && matches.length === 1) {
+                        headerComponent.example = {
+                            header_text: ""
+                        };
+                        const headerExampleField = document.getElementById('createHeaderText').parentNode.querySelector('.example-field');
+                        if (headerExampleField) {
+                            headerComponent.example.header_text = headerExampleField.value.trim(); // Almacena como string
+                        }
+                    }
+
+                    jsonBody.components.push(headerComponent);
+                }
+
+                // Agregar BODY con validación de variables
+                if (bodyText) {
+                    const bodyComponent = {
+                        type: "BODY",
+                        text: bodyText
+                    };
+
+                    // Verificar si el BODY contiene variables
+                    if (/\{\{\d+\}\}/.test(bodyText)) {
+                        bodyComponent.example = {
+                            body_text: []
+                        };
+                        const bodyExamples = document.getElementById('createBodyText').parentNode.querySelectorAll('.example-field');
+                        const bodyExampleValues = [];
+
+                        bodyExamples.forEach((exampleField) => {
+                            bodyExampleValues.push(exampleField.value.trim());
+                        });
+
+                        bodyComponent.example.body_text.push(bodyExampleValues);
+                    }
+
+                    jsonBody.components.push(bodyComponent);
+                }
+
+                // Agregar FOOTER si está presente
+                if (footerText) {
+                    jsonBody.components.push({
+                        type: "FOOTER",
+                        text: footerText
+                    });
+                }
+
+                // Construcción dinámica del campo de botones
+                const buttons = [];
+
+                // Obtener todos los botones dinámicos
+                document.querySelectorAll('.create_quick_replay_button_group, .create_call_to_action_button_group').forEach(buttonGroup => {
+                    const buttonTypeElement = buttonGroup.querySelector('select[name="call_to_action_button_type"], select[name="quick_replay_button_type"]');
+                    if (buttonTypeElement) {
+                        const buttonType = buttonTypeElement.value;
+                        const buttonText = buttonGroup.querySelector('input[name="call_to_action_button_text"], input[name="quick_replay_button_text"]').value;
+                        let buttonData = { type: buttonType, text: buttonText };
+
+                        if (buttonType === 'URL') {
+                            buttonData.url = buttonGroup.querySelector('input[name="call_to_action_button_url"]').value;
+                        } else if (buttonType === 'PHONE_NUMBER') {
+                            buttonData.phone_number = buttonGroup.querySelector('input[name="call_to_action_button_phone"]').value;
+                        } else if (buttonType === 'COPY_CODE') {
+                            buttonData.example = [buttonGroup.querySelector('input[name="call_to_action_button_code"]').value];
+                        }
+
+                        buttons.push(buttonData);
+                    }
+                });
+
+                // Agregar botones a los componentes si existen
+                if (buttons.length > 0) {
+                    jsonBody.components.push({
+                        type: "BUTTONS",
+                        buttons: buttons
+                    });
+                }
+
+                // Enviar la solicitud al controlador de Laravel
+                $.ajax({
+                    url: '{{ route('template.create') }}', // Ruta de Laravel para crear la plantilla
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        action: 'create_template',
+                        wa_id: '462194216974157',
+                        jsonBody: jsonBody,
+                        _token: '{{ csrf_token() }}'
+                    }),
+                    success: function (data) {
+                        console.log('Éxito:', data);
+                        alert("Plantilla creada con éxito. Se debe esperar por la revisión de META.");
+                        $('#modal_create_template').modal('hide');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error en la solicitud:', error);
+
+                        if (xhr.responseJSON && xhr.responseJSON.error && xhr.responseJSON.error.error_user_msg) {
+                            alert(xhr.responseJSON.error.error_user_msg); // Muestra un mensaje específico si está disponible
+                        } else {
+                            alert("Hubo un error al crear la plantilla. Por favor, intenta de nuevo.");
+                        }
+                    }
+                });
+            }
+
+            // Attach submit event to the form
+            document.getElementById('createTemplateForm').addEventListener('submit', submitCreateTemplateForm);
+
+            // Función para limpiar los campos del formulario
+            // function clearFormFields() {
+            //     document.getElementById('editTemplateForm').reset();
+            //     $('#variableFields').empty();
+            // }
+
+            // Delegación de eventos para abrir el modal de edición
 
 
-
+            $(document).on('click', '.modal-editTemplate', function () {
+                openEditModal(this);
+            });
         });
+
+
+
 
         $(document).ready(function() {
             function openSendModal(button) {
@@ -1165,6 +1505,13 @@
                         alert("Hubo un error al enviar la plantilla. Por favor, intenta de nuevo.");
                     }
                 });
+            });
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+
+
             });
         });
 

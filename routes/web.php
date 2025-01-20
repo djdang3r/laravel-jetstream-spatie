@@ -44,6 +44,7 @@ Route::middleware([
     Route::get('/templates', [WhatsappAPICLoudController::class, 'templatesList'])->name('templates.list');
     Route::post('/template-detail', [WhatsappAPICLoudController::class, 'getTemplateDetail'])->name('template.detail');
     Route::post('/template-json', [WhatsappAPICLoudController::class, 'getTemplateJson'])->name('template.json');
+    Route::post('/template-create', [WhatsappAPICLoudController::class, 'createTemplate'])->name('template.create');
     Route::post('/template-update', [WhatsappAPICLoudController::class, 'updateTemplate'])->name('template.update');
     Route::post('/send-template', [WhatsappAPICLoudController::class, 'sendTemplate'])->name('template.send');
     //Route::get('/templates/{template}', [WhatsappAPICLoudController::class, 'templateDetail'])->name('templates.detail');

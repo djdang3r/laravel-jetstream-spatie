@@ -15,10 +15,7 @@
                     <div class="form-group mb-3">
                         <label for="createTemplateName">Nombre de la Plantilla</label>
                         <input type="text" id="createTemplateName" name="createTemplateName" class="form-control"
-                            maxlength="512" readonly>
-                        <input type="hidden" id="createTemplateId" name="createTemplateId">
-                        <input type="hidden" id="createTemplateWabaId" name="createTemplateWabaId">
-                        <input type="hidden" id="createCategory" name="createCategory">
+                            maxlength="512">
                     </div>
 
                     <!-- Categoria de la Plantilla -->
@@ -50,36 +47,49 @@
                     </div>
 
                     <!-- Encabezado de la Plantilla -->
-                    <div class="form-group mb-3">
-                        <label for="createTemplateHeader">Encabezado de la plantilla</label>
-                        <select class="form-control" name="createTemplateHeader" id="createTemplateHeader">
-                            <option value="ninguno" selected>Ninguno</option>
-                            <option value="TEXT">Mensaje de Texto</option>
-                            <option value="IMAGE">Imagen</option>
-                            <option value="VIDEO">Video</option>
-                            <option value="DOCUMENT">Documento</option>
-                            <option value="Ubicacion">Ubicacion</option>
+                    <div class="form-group mb-3 auth-template">
+                        <label for="createSecurityRecommendation">Recomendacion de Seguridad</label>
+                        <select class="form-control" name="createSecurityRecommendation" id="createSecurityRecommendation">
+                            <option value="false">No</option>
+                            <option value="true" selected>Si</option>
                         </select>
                     </div>
 
-                    <!-- Header Text -->
-                    <div class="form-group mb-3" id="headerTextGroup">
-                        <label for="createHeaderText">Texto del Header</label>
-                        <input type="text" id="createHeaderText" name="createHeaderText" class="form-control variable variable-1"
-                            maxlength="60">
-                        <small class="form-text text-muted">Texto que aparecerá en el encabezado de la plantilla
-                            (opcional).</small>
-                        <div id="variableFields"></div>
+                    <!-- Encabezado de la Plantilla -->
+                    <div class="form-group mb-3 auth-template">
+                        <label for="createCodeExpiration">Recomendacion de Seguridad</label>
+                        <select class="form-control" name="createCodeExpiration" id="createCodeExpiration">
+                            <option value="false">No</option>
+                            <option value="true" selected>Si</option>
+                        </select>
                     </div>
 
-                    <div class="row" id="headerImageGroup">
+                    <!-- Encabezado de la Plantilla -->
+                    <div class="form-group mb-3">
+                        <label for="createTemplateHeader">Encabezado de la plantilla</label>
+                        <input type="number" id="createTemplateHeader" name="createTemplateHeader"
+                            class="form-control variable variable-1" min="0" max="60" step="1">
+                    </div>
+
+                    <!-- Header Text -->
+                    <div class="form-group mb-3" id="createHeaderTextGroup">
+                        <label for="createHeaderText">Texto del Header</label>
+                        <input type="text" id="createHeaderText" name="createHeaderText"
+                            class="form-control variable variable-1" maxlength="60">
+                        <small class="form-text text-muted">Texto que aparecerá en el encabezado de la plantilla
+                            (opcional).</small>
+                        <div id="createVariableFields"></div>
+                    </div>
+
+                    <div class="row" id="createHeaderImageGroup">
                         <!-- Header Image -->
                         <div class="col-6">
-                            <div class="form-group mb-3" >
+                            <div class="form-group mb-3">
                                 <label for="createHeaderImage">Imagen del Header</label>
-                                <input type="file" id="createHeaderImage" name="createHeaderImage" class="form-control"
-                                    accept="image/*">
-                                <small class="form-text text-muted">Imagen que aparecerá en el encabezado de la plantilla
+                                <input type="file" id="createHeaderImage" name="createHeaderImage"
+                                    class="form-control" accept="image/*">
+                                <small class="form-text text-muted">Imagen que aparecerá en el encabezado de la
+                                    plantilla
                                     (opcional).</small>
                             </div>
                         </div>
@@ -89,7 +99,7 @@
                     </div>
 
                     <!-- Header Video -->
-                    <div class="form-group mb-3" id="headerVideoGroup">
+                    <div class="form-group mb-3" id="createHeaderVideoGroup">
                         <label for="createHeaderVideo">Video del Header</label>
                         <input type="file" id="createHeaderVideo" name="createHeaderVideo" class="form-control"
                             accept="video/*">
@@ -98,10 +108,10 @@
                     </div>
 
                     <!-- Header Document -->
-                    <div class="form-group mb-3" id="headerDocumentGroup">
+                    <div class="form-group mb-3" id="createHeaderDocumentGroup">
                         <label for="createHeaderDocument">Documento del Header</label>
-                        <input type="file" id="createHeaderDocument" name="createHeaderDocument" class="form-control"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx">
+                        <input type="file" id="createHeaderDocument" name="createHeaderDocument"
+                            class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx">
                         <small class="form-text text-muted">Documento que aparecerá en el encabezado de la plantilla
                             (opcional).</small>
                     </div>
@@ -109,7 +119,8 @@
                     <!-- Body -->
                     <div class="form-group mb-3">
                         <label for="createBodyText">Texto del Body</label>
-                        <textarea id="createBodyText" name="createBodyText" class="form-control variable variable-10" rows="4" maxlength="1024" required></textarea>
+                        <textarea id="createBodyText" name="createBodyText" class="form-control variable variable-10" rows="4"
+                            maxlength="1024" required></textarea>
                         <small class="form-text text-muted">Texto principal del mensaje. Puedes incluir variables
                             usando
                             @{{ 1 }}, @{{ 2 }}, @{{ order_id }},
@@ -119,8 +130,8 @@
                     <!-- Footer -->
                     <div class="form-group mb-3">
                         <label for="createFooterText">Texto del Footer</label>
-                        <input type="text" id="createFooterText" name="createFooterText" class="form-control variable variable-0"
-                            maxlength="60">
+                        <input type="text" id="createFooterText" name="createFooterText"
+                            class="form-control variable variable-0" maxlength="60">
                         <small class="form-text text-muted">Texto de pie de página (opcional).</small>
                     </div>
 
@@ -136,26 +147,23 @@
                                 </button>
                                 <div class="dropdown-menu" role="menu" style="">
                                     <p><b>Botones de respuesta rápida</b></p>
-                                    <a class="dropdown-item" id="quick_replay_button" href="#">Desactivar
+                                    <a class="dropdown-item" id="create_quick_replay_button" href="#">Desactivar
                                         marketing <sub>Recomendado</sub></a>
-                                    <a class="dropdown-item" id="quick_replay_custon_button"
+                                    <a class="dropdown-item" id="create_quick_replay_custon_button"
                                         href="#">Personalizado</a>
                                     <div class="dropdown-divider"></div>
                                     <p><b>Botones de llamada a la acción</b></p>
-                                    <a class="dropdown-item" id="go_to_web_button" href="#">Ir a sitio web
-                                        <sub>2 botones
-                                            maximo</sub></a>
-                                    <a class="dropdown-item" id="call_button" href="#">Llamar a numero de
-                                        telefono <sub>1
-                                            boton como maximo</sub></a>
-                                    <a class="dropdown-item" id="copy_code_button" href="#">Copiar codigo de
-                                        oferta <sub>1 boton
-                                            como maximo</sub></a>
+                                    <a class="dropdown-item" id="create_go_to_web_button" href="#">Ir a sitio web
+                                        <sub>2 botones maximo</sub></a>
+                                    <a class="dropdown-item" id="create_call_button" href="#">Llamar a numero de
+                                        telefono <sub>1 boton como maximo</sub></a>
+                                    <a class="dropdown-item" id="create_copy_code_button" href="#">Copiar codigo de
+                                        oferta <sub>1 boton como maximo</sub></a>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="buttons_groug">
+                        <div class="create_buttons_group">
 
                         </div>
                     </div>
