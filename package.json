@@ -17,25 +17,25 @@
         "@builderbot/database-mysql": "1.2.1",
         "@builderbot/provider-meta": "1.2.1",
         "@woocommerce/woocommerce-rest-api": "^1.0.1",
-        "chalk": "^5.3.0",
+        "chalk": "^5.4.1",
         "morgan": "^1.10.0",
-        "mysql2": "^3.11.0",
-        "openai": "^4.56.0"
+        "mysql2": "^3.12.0",
+        "openai": "^4.80.0"
     },
     "devDependencies": {
-        "@tailwindcss/forms": "^0.5.9",
-        "@tailwindcss/typography": "^0.5.15",
+        "@tailwindcss/forms": "^0.5.10",
+        "@tailwindcss/typography": "^0.5.16",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
-        "laravel-echo": "^1.17.1",
-        "laravel-vite-plugin": "^1.1.1",
-        "postcss": "^8.4.49",
-        "pusher-js": "8.4.0-rc2",
-        "tailwindcss": "^3.4.16",
-        "vite": "^5.4.11",
-        "eslint": "^8.57.0",
+        "eslint": "^8.57.1",
         "eslint-plugin-builderbot": "latest",
-        "nodemon": "^3.1.4"
+        "laravel-echo": "^1.19.0",
+        "laravel-vite-plugin": "^1.2.0",
+        "nodemon": "^3.1.9",
+        "postcss": "^8.5.1",
+        "pusher-js": "8.4.0-rc2",
+        "tailwindcss": "^3.4.17",
+        "vite": "^5.4.14"
     },
     "author": "",
     "license": "ISC"
