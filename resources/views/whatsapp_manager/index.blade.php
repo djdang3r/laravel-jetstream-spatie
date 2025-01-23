@@ -164,6 +164,8 @@
             });
 
             // Ocultar los campos de archivo al cargar la página
+            $('.authentication_template').hide();
+
             $('#headerTextGroup').hide();
             $('#headerImageGroup').hide();
             $('#headerVideoGroup').hide();
@@ -175,6 +177,22 @@
             $('#createHeaderDocumentGroup').hide();
 
             // Mostrar/ocultar los campos de archivo según el valor del select
+            $('#createTemplateCategory').on('change', function () {
+                var selectedValue = $(this).val();
+                // alert(selectedValue);
+
+                if (selectedValue === 'UTILITY') {
+                    $('.authentication_template').hide();
+                    $('.utility_template').show();
+                } else if (selectedValue === 'MARKETING') {
+                    $('.authentication_template').hide();
+                    $('.utility_template').show();
+                } else if (selectedValue === 'AUTHENTICATION') {
+                    $('.authentication_template').show();
+                    $('.utility_template').hide();
+                }
+            });
+
             $('#editTemplateHeader').on('change', function () {
                 var selectedValue = $(this).val();
                 // alert(selectedValue);
@@ -1508,10 +1526,27 @@
             });
 
 
-            document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById('voiceForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const text = document.getElementById('textInput').value;
 
-
-
+                fetch('/generate-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ text: text })
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const audioUrl = URL.createObjectURL(blob);
+                    const audioPlayback = document.getElementById('audioPlayback');
+                    audioPlayback.src = audioUrl;
+                    audioPlayback.style.display = 'block';
+                    audioPlayback.play();
+                })
+                .catch(error => console.error('Error:', error));
             });
         });
 
