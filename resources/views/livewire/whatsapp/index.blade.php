@@ -15,6 +15,8 @@
                                     data-toggle="tab">Whatsapp Chats</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#templates"
                                         data-toggle="tab">Templates</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#tts"
+                                    data-toggle="tab">Text to Speach</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#update-account" data-toggle="tab">Update
                                         Account</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a>
@@ -82,6 +84,18 @@
                                 <div class="tab-pane" id="templates">
                                     {{-- @livewire('whatsapp.templates') --}}
                                     <livewire:whatsapp.templates />
+                                </div>
+
+                                <div class="tab-pane" id="tts">
+                                    <form id="voiceForm">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="textInput">Texto:</label>
+                                            <input type="text" id="textInput" name="text" class="form-control" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Generar Voz</button>
+                                    </form>
+                                    <audio id="audioPlayback" controls style="display:none;"></audio>
                                 </div>
 
                                 <div class="tab-pane" id="update-account">

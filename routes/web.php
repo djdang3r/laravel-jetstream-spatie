@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsappChatController;
 use App\Http\Controllers\WhatsappWebhookController;
 use App\Http\Controllers\WhatsappAPICLoudController;
+use App\Http\Controllers\TextToSpeachController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -51,4 +52,6 @@ Route::middleware([
 
     // Whatsapp Chat
     Route::get('/whatsapp_chat', [WhatsappChatController::class, 'whatsappIndex'])->name('whatsapp.index');
+
+    Route::post('/generate-voice', [TextToSpeachController::class, 'generateVoice'])->name('generate.voice');
 });
