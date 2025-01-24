@@ -1100,22 +1100,31 @@
                 };
 
                 // Agregar HEADER si está presente
-                if (headerText) {
+                if (headerType !== 'ninguno') {
                     const headerComponent = {
                         type: "HEADER",
-                        format: "TEXT",
-                        text: headerText
+                        format: headerType
                     };
 
-                    // Verificar si el HEADER contiene un único comodín
-                    const matches = headerText.match(/\{\{\d+\}\}/g);
-                    if (matches && matches.length === 1) {
-                        headerComponent.example = {
-                            header_text: ""
-                        };
-                        const headerExampleField = document.getElementById('editHeaderText').parentNode.querySelector('.example-field');
-                        if (headerExampleField) {
-                            headerComponent.example.header_text = headerExampleField.value.trim(); // Almacena como string
+                    if (headerType === 'TEXT') {
+                        headerComponent.text = headerText;
+
+                        // Verificar si el HEADER contiene un único comodín
+                        const matches = headerText.match(/\{\{\d+\}\}/g);
+                        if (matches && matches.length === 1) {
+                            headerComponent.example = {
+                                header_text: ""
+                            };
+                            const headerExampleField = document.getElementById('createHeaderText').parentNode.querySelector('.example-field');
+                            if (headerExampleField) {
+                                headerComponent.example.header_text = headerExampleField.value.trim(); // Almacena como string
+                            }
+                        }
+                    } else if (headerType === 'IMAGE' || headerType === 'VIDEO' || headerType === 'DOCUMENT') {
+                        const headerFileInput = document.getElementById(`createHeader${headerType.charAt(0) + headerType.slice(1).toLowerCase()}`);
+                        if (headerFileInput.files.length > 0) {
+                            const file = headerFileInput.files[0];
+                            headerComponent.file = file;
                         }
                     }
 
@@ -1227,6 +1236,7 @@
                 const templateName = document.getElementById('createTemplateName').value;
                 const templateLanguage = document.getElementById('createTemplateLanguage').value;
                 const templateCategory = document.getElementById('createTemplateCategory').value;
+                const headerType = document.getElementById('createTemplateHeader').value;
                 const headerText = document.getElementById('createHeaderText').value;
                 const bodyText = document.getElementById('createBodyText').value;
                 const footerText = document.getElementById('createFooterText').value;
@@ -1240,23 +1250,40 @@
                     category: templateCategory
                 };
 
+                // Crear un FormData para manejar la subida de archivos
+                const formData = new FormData();
+                formData.append('name', templateName);
+                formData.append('language', templateLanguage);
+                formData.append('category', templateCategory);
+                formData.append('_token', '{{ csrf_token() }}');
+
                 // Agregar HEADER si está presente
-                if (headerText) {
+                if (headerType !== 'ninguno') {
                     const headerComponent = {
                         type: "HEADER",
-                        format: "TEXT",
-                        text: headerText
+                        format: headerType
                     };
 
-                    // Verificar si el HEADER contiene un único comodín
-                    const matches = headerText.match(/\{\{\d+\}\}/g);
-                    if (matches && matches.length === 1) {
-                        headerComponent.example = {
-                            header_text: ""
-                        };
-                        const headerExampleField = document.getElementById('createHeaderText').parentNode.querySelector('.example-field');
-                        if (headerExampleField) {
-                            headerComponent.example.header_text = headerExampleField.value.trim(); // Almacena como string
+                    if (headerType === 'TEXT') {
+                        headerComponent.text = headerText;
+
+                        // Verificar si el HEADER contiene un único comodín
+                        const matches = headerText.match(/\{\{\d+\}\}/g);
+                        if (matches && matches.length === 1) {
+                            headerComponent.example = {
+                                header_text: ""
+                            };
+                            const headerExampleField = document.getElementById('createHeaderText').parentNode.querySelector('.example-field');
+                            if (headerExampleField) {
+                                headerComponent.example.header_text = headerExampleField.value.trim(); // Almacena como string
+                            }
+                        }
+                    } else if (headerType === 'IMAGE' || headerType === 'VIDEO' || headerType === 'DOCUMENT') {
+                        const headerFileInput = document.getElementById(`createHeader${headerType.charAt(0) + headerType.slice(1).toLowerCase()}`);
+                        if (headerFileInput.files.length > 0) {
+                            const file = headerFileInput.files[0];
+                            formData.append('header_file', file);
+                            // No agregues el nombre del archivo al JSON aquí
                         }
                     }
 
@@ -1327,17 +1354,17 @@
                     });
                 }
 
+                // Agregar el JSON al FormData
+                formData.append('jsonBody', JSON.stringify(jsonBody));
+                console.log(jsonBody);
+
                 // Enviar la solicitud al controlador de Laravel
                 $.ajax({
                     url: '{{ route('template.create') }}', // Ruta de Laravel para crear la plantilla
                     type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        action: 'create_template',
-                        wa_id: '462194216974157',
-                        jsonBody: jsonBody,
-                        _token: '{{ csrf_token() }}'
-                    }),
+                    processData: false,
+                    contentType: false,
+                    data: formData,
                     success: function (data) {
                         console.log('Éxito:', data);
                         alert("Plantilla creada con éxito. Se debe esperar por la revisión de META.");
@@ -1346,8 +1373,9 @@
                     error: function (xhr, status, error) {
                         console.error('Error en la solicitud:', error);
 
-                        if (xhr.responseJSON && xhr.responseJSON.error && xhr.responseJSON.error.error_user_msg) {
-                            alert(xhr.responseJSON.error.error_user_msg); // Muestra un mensaje específico si está disponible
+                        if (xhr.responseJSON) {
+                            const errorMsg = xhr.responseJSON.error_user_msg || xhr.responseJSON.message || "Hubo un error al crear la plantilla. Por favor, intenta de nuevo.";
+                            alert(errorMsg); // Muestra un mensaje específico si está disponible
                         } else {
                             alert("Hubo un error al crear la plantilla. Por favor, intenta de nuevo.");
                         }

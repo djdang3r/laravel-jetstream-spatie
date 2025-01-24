@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Contact;
 use App\Models\Message;
 use App\Models\Template;
@@ -12,7 +14,7 @@ use App\Models\WhatsappBusinessAccount;
 use App\Models\WhatsappPhoneNumber;
 use App\Models\WhatsappBusinessProfile;
 use App\Models\Website;
-use Illuminate\Support\Facades\Log;
+
 
 class WhatsappAPICLoudController extends Controller
 {
@@ -289,16 +291,71 @@ class WhatsappAPICLoudController extends Controller
 
     public function createTemplate(Request $request)
     {
-        $wa_account = WhatsappBusinessAccount::find($request->wa_id);
+        // $wa_account = WhatsappBusinessAccount::find($request->wa_id);
+        $wa_account = WhatsappBusinessAccount::find('462194216974157');
 
         // Enviar el mensaje a la API de WhatsApp
         $apiUrl = env('WHATSAPP_API_URL') . env('WHATSAPP_API_VERSION') . '/' . $wa_account->whatsapp_business_id . '/message_templates';
         $apiToken = $wa_account->api_token;
 
-        $payload = $request->jsonBody;
+        $jsonBody = json_decode($request->input('jsonBody'), true);
 
-        // dd(json_encode($payload));
-        // exit();
+        if ($request->hasFile('header_file')) {
+            $file = $request->file('header_file');
+            $fileName = $file->getClientOriginalName();
+            $fileSize = $file->getSize();
+            $fileType = $file->getMimeType();
+            $filePath = $file->getPathname();
+
+            // Paso 1: Iniciar una sesión de subida
+            $appId = '1085687916275343';
+            $accessToken = $apiToken;
+            $initUploadUrl = "https://graph.facebook.com/v22.0/{$appId}/uploads?file_name=465001370_901034971594679_739546611693949742_n.jpg&file_length=87605&file_type=image/jpeg&access_token=EAAPbbWqWJo8BO3IsgkLgUx4CjGNExVDCWW03bYhr8RqldQrUKuQWkrCZBZAYMddEIGqFOAGM806os8GGf6ippT8savgjALvXRm0ZAkf12MQ11BIdxSJTvljYD91JlAGksxEbSlpgojXvy89Vf3muMcZBoVmyk3FdLCaWT3uyXkedZAj7ppgE3qheaYzLUWzgBXAZDZD";
+
+            Log::info('Init Upload URL: ' . $initUploadUrl);
+
+            $initResponse = Http::post($initUploadUrl, [], []);
+
+            if (!$initResponse->successful()) {
+                Log::error('Error al iniciar la sesión de subida', ['response' => $initResponse->json()]);
+                return response()->json(['error' => 'Error al iniciar la sesión de subida'], 500);
+            }
+
+            LOG::info('response: ', [''=> $initResponse->json()]);
+
+            $uploadSessionId = $initResponse->json('id');
+
+            // Paso 2: Comenzar la subida
+            $uploadUrl = "https://graph.facebook.com/v22.0/{$uploadSessionId}";
+
+            LOG::info("Second pass: ". $uploadUrl);
+
+            $uploadResponse = Http::withHeaders([
+                'Authorization' => "OAuth {$accessToken}",
+                'Content-Type' => $fileType,
+                'file_offset' => 0,
+            ])->attach('file', file_get_contents($filePath), $fileName)
+            ->post($uploadUrl);
+
+            if (!$uploadResponse->successful()) {
+                Log::error('Error al subir el archivo', ['response' => $uploadResponse->json()]);
+                return response()->json(['error' => 'Error al subir el archivo'], 500);
+            }
+
+            $uploadedFileHandle = $uploadResponse->json('h');
+
+            // Encuentra el componente HEADER y actualiza el campo de archivo
+            foreach ($jsonBody['components'] as &$component) {
+                if ($component['type'] === 'HEADER' && isset($component['format']) && in_array($component['format'], ['IMAGE', 'VIDEO', 'DOCUMENT'])) {
+                    $component['example'] = [
+                        'header_handle' => [$uploadedFileHandle]
+                    ];
+                    break;
+                }
+            }
+        }
+
+        $payload = $jsonBody;
 
         Log::info('Create Template: ', ['payload' => $payload]);
 
@@ -307,7 +364,17 @@ class WhatsappAPICLoudController extends Controller
         if ($response->successful()) {
             return response()->json(['message' => 'Solicitud de Creacion de plantilla enviada con éxito.'], 200);
         } else {
-            return response()->json(['error' => $response->json()], $response->status());
+            $error = $response->json('error');
+            return response()->json([
+                'message' => $error['message'] ?? 'Error desconocido',
+                'type' => $error['type'] ?? 'Error',
+                'code' => $error['code'] ?? 500,
+                'error_subcode' => $error['error_subcode'] ?? null,
+                'is_transient' => $error['is_transient'] ?? false,
+                'error_user_title' => $error['error_user_title'] ?? null,
+                'error_user_msg' => $error['error_user_msg'] ?? 'Hubo un error al crear la plantilla. Por favor, intenta de nuevo.',
+                'fbtrace_id' => $error['fbtrace_id'] ?? null
+            ], $response->status());
         }
     }
 
