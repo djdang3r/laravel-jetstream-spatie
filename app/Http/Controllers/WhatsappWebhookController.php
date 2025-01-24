@@ -52,7 +52,7 @@ class WhatsappWebhookController extends Controller
             Log::info('Webhook received: ' . print_r($input, true));
 
             // Reenviar los datos a la URL secundaria
-            $this->reenviarDatos($input);
+            // $this->reenviarDatos($input);
 
             // Verifica que el mensaje está en el formato esperado
             if (isset($input['entry'][0]['changes'][0]['value']['messages'][0])) {

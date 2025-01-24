@@ -204,7 +204,7 @@ const main = async () => {
     const botsConfig = [
         {
             flows: [dxFlow, welcomeFlow, registerFlow, fullSamplesFlow],
-            jwtToken: '',
+            jwtToken: 'EAAKt6D2DgZCMBOxIh2k7uW6aDV8AIUwvbJA1hMkpcRvZAaW9OHMJrOHwKUH8gmc1FSaYKPGU2RhYaYSuSUH8ZCs208ng3d6QvYOd79EBzm6JOcr3Bi3kniGgoWATwa86zoPYMj4UZB12O4lZCj7BlIW2G5uCGwlxe1ZARWhfW29ikepCHdlexTaSJmoLmRvdosiQZDZD',
             numberId: '194112953793281',
             verifyToken: 'QWERTY3135694227',
             version: 'v21.0',
@@ -216,7 +216,7 @@ const main = async () => {
         },
         {
             flows: [dxFlow, welcomeFlow, registerFlow, fullSamplesFlow],
-            jwtToken: '',
+            jwtToken: 'EAAKt6D2DgZCMBO0okpBCZCJjWcvew7dLAqwREc3TiaEQIH1QMSJjSqAZA7M3BxMZCQ80OYIVX7K1HkHPjNuuNWYmKmllx9Bepwyu5dS6rmuInZC3qZBy22NyKaMHe6VCZBi4QA9SZBBNWM5PgkNRCuWcZBhNahtgjTP2AFOypa8A0rZBapdoShq8AAQ7Cs7AsLpTFN7gZDZD',
             numberId: '444327995434415',
             verifyToken: 'QWERTY3135694227',
             version: 'v21.0',
