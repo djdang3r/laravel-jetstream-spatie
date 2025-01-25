@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 Route::post('/webhook-app', [WhatsappWebhookController::class, 'handle']);
 Route::get('/webhook-app', [WhatsappWebhookController::class, 'handle']);
 
+Route::get('/foo', function () {
+    Artisan::call('storage:link');
+});
+
+Route::get('/storage_link', function (){ Artisan::call('storage:link'); });
+
 
 Route::get('/', function () {
     return view('welcome');
