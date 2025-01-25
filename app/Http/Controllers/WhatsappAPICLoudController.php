@@ -307,8 +307,13 @@ class WhatsappAPICLoudController extends Controller
             $fileType = $file->getMimeType();
             $filePath = $file->getPathname();
 
+            $path = $file->store('public/uploads');
+            $multimedia_url = asset(Storage::url($path)); // Obtener la URL completa pública del archivo
+
+            LOG::info('Multimedia URL: ' . $multimedia_url);
+
             // Paso 1: Iniciar una sesión de subida
-            $appId = '1085687916275343';
+            $appId = $wa_account->app_id;
             $accessToken = $apiToken;
             $initUploadUrl = "https://graph.facebook.com/v22.0/{$appId}/uploads?file_name=465001370_901034971594679_739546611693949742_n.jpg&file_length=87605&file_type=image/jpeg&access_token=EAAPbbWqWJo8BO3IsgkLgUx4CjGNExVDCWW03bYhr8RqldQrUKuQWkrCZBZAYMddEIGqFOAGM806os8GGf6ippT8savgjALvXRm0ZAkf12MQ11BIdxSJTvljYD91JlAGksxEbSlpgojXvy89Vf3muMcZBoVmyk3FdLCaWT3uyXkedZAj7ppgE3qheaYzLUWzgBXAZDZD";
 
@@ -344,6 +349,8 @@ class WhatsappAPICLoudController extends Controller
 
             $uploadedFileHandle = $uploadResponse->json('h');
 
+            LOG::info('Uploaded File Handle: ', ['handle' => $uploadedFileHandle]);
+
             // Encuentra el componente HEADER y actualiza el campo de archivo
             foreach ($jsonBody['components'] as &$component) {
                 if ($component['type'] === 'HEADER' && isset($component['format']) && in_array($component['format'], ['IMAGE', 'VIDEO', 'DOCUMENT'])) {
@@ -362,7 +369,38 @@ class WhatsappAPICLoudController extends Controller
         $response = Http::withToken($apiToken)->post($apiUrl, $payload);
 
         if ($response->successful()) {
-            return response()->json(['message' => 'Solicitud de Creacion de plantilla enviada con éxito.'], 200);
+            $templateId = $response->json('id');
+
+            // Obtener la plantilla creada
+            $templateUrl = env('WHATSAPP_API_URL') . env('WHATSAPP_API_VERSION') . '/' . $templateId;
+            $templateResponse = Http::withToken($apiToken)->get($templateUrl);
+
+            if ($templateResponse->successful()) {
+                $templateData = $templateResponse->json();
+
+
+
+                // Guardar la plantilla en la base de datos
+                $template_tmp = Template::updateOrCreate(
+                    ['wa_template_id' => $templateData['id']],
+                    [
+                        'whatsapp_business_id' => $wa_account->whatsapp_business_id,
+                        'name' => $templateData['name'],
+                        'language' => $templateData['language'],
+                        'category' => $templateData['category'],
+                        'status' => $templateData['status'],
+                        'file' => $multimedia_url ?? null,
+                        'json' => json_encode($templateData),
+                    ]
+                );
+
+                LOG::info('Template created: ', ['template' => $template_tmp]);
+
+                return response()->json(['message' => 'Plantilla creada y guardada con éxito.', 'template' => $templateData], 200);
+            } else {
+                Log::error('Error al obtener la plantilla', ['response' => $templateResponse->json()]);
+                return response()->json(['error' => 'Error al obtener la plantilla'], 500);
+            }
         } else {
             $error = $response->json('error');
             return response()->json([

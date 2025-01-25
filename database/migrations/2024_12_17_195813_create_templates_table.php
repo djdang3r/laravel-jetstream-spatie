@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('language', 45);
             $table->string('category', 45);
             $table->string('status', 45)->nullable();
+            $table->text('file')->nullable();
             $table->json('json');
             $table->timestamps();
             $table->softDeletes();

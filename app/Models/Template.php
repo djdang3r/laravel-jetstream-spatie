@@ -22,6 +22,7 @@ class Template extends Model
         'language',
         'category',
         'status',
+        'file',
         'json',
     ];
 

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('whatsapp_business_accounts', function (Blueprint $table) {
             $table->char('whatsapp_business_id', 36)->primary();
             $table->text('api_token')->nullable();
+            $table->char('app_id', 20)->unique()->nullable();
             $table->string('webhook_token', 200)->nullable();
             $table->timestamps();
             $table->softDeletes();
