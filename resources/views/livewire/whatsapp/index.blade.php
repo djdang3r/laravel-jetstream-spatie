@@ -86,6 +86,11 @@
                                     <livewire:whatsapp.templates />
                                 </div>
 
+                                <div class="tab-pane" id="contact_list">
+                                    {{-- @livewire('whatsapp.templates') --}}
+                                    @include('livewire.whatsapp.contact-list')
+                                </div>
+
                                 <div class="tab-pane" id="tts">
                                     <form id="voiceForm">
                                         @csrf

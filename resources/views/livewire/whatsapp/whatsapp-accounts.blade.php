@@ -43,6 +43,8 @@
                         alt="User profile picture">
                 </div>
 
+                <input type="hidden" name="whatsapp_business_accounts_id" id="whatsapp_business_accounts_id" value="{{ $selectedBusinessAccount->whatsapp_business_id }}">
+
                 <h3 class="profile-username text-center">{{ $selectedProfile->phoneNumber->verified_name }}</h3>
 
                 <p class="text-muted text-center">+{{ $selectedProfile->phoneNumber->display_phone_number }}</p>

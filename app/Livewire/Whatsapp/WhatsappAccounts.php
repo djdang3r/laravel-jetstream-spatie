@@ -15,6 +15,8 @@ class WhatsappAccounts extends Component
     public $accounts;
     public $phoneNumbers = [];
     public $selectedProfile = null;
+    public $selectedBusinessAccount = null;
+    public $selectedPhoneNumber = null;
     public $conversations = [];
 
     public function mount()
@@ -37,6 +39,8 @@ class WhatsappAccounts extends Component
     {
         $phone_profile = WhatsappBusinessProfile::find($profile["whatsapp_business_profile_id"]);
         $this->selectedProfile = $phone_profile;
+        $this->selectedPhoneNumber = $phone_profile->phone_number;
+        $this->selectedBusinessAccount = $phone_profile->phoneNumber->businessAccount;
 
         $this->dispatch("conversations-list", $phone_profile->whatsapp_business_profile_id);
     }
