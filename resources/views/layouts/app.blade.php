@@ -1,51 +1,70 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    @include('layouts.partials.head')
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    {{-- Custom stylesheets (pre AdminLTE) --}}
+    <!--custom css-->
+    @yield('css')
 
-        <!-- Scripts -->
-        {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
-        @if (app()->isProduction())
-            <link rel="stylesheet" href="{{ asset('build/assets/app-CUSTOMHASH.css') }}">
-            <script src="{{ asset('build/assets/app-CUSTOMHASH.js') }}" defer></script>
-        @else
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @endif
 
-        <!-- Styles -->
-        @livewireStyles
-    </head>
-    <body class="font-sans antialiased">
-        <x-banner />
+    @include('layouts.partials.css')
 
-        <div class="min-h-screen bg-gray-100">
-            @livewire('navigation-menu')
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <style>
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+        </style>
+    @endif
 
-            <!-- Page Content -->
+    <!-- Styles -->
+    @livewireStyles
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <div class="loader-wrapper">
+            <div class="loader_16"></div>
+        </div>
+
+        @include('layouts.partials.sidebar')
+
+        <div class="app-content">
+            @include('layouts.partials.header')
             <main>
-                {{ $slot }}
+                <div class="container-fluid">
+                    <div class="row">
+                        @yield('content_header')
+                        <div class="" id="alerts-content"></div>
+                        @yield('content')
+                    </div>
+                </div>
             </main>
         </div>
 
-        @stack('modals')
+         <!-- tap on top -->
+        <div class="go-top">
+            <span class="progress-value">
+            <i class="ti ti-arrow-up"></i>
+            </span>
+        </div>
 
-        @livewireScripts
-    </body>
+        @yield('modals')
+
+    </div>
+
+    <!--customizer-->
+    <div id="customizer"></div>
+
+    @include('layouts.partials.scripts')
+
+    <!--custom js-->
+    @yield('js')
+
+    @livewireScripts
+</body>
+
 </html>

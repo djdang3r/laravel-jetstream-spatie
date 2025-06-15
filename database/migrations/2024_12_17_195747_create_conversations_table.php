@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
-            $table->uuid('conversation_id')->primary();
+        Schema::create('whatsapp_conversations', function (Blueprint $table) {
+            $table->ulid('conversation_id')->primary();
             $table->string('wa_conversation_id', 200)->unique();
-            $table->timestamp('expiration_timestamp');
+            $table->timestamp('expiration_timestamp')->nullable();
             $table->string('origin', 45);
             $table->string('pricing_model', 45)->nullable();
             $table->string('billable', 45)->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conversations');
+        Schema::dropIfExists('whatsapp_conversations');
     }
 };

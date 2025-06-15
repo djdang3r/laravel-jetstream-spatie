@@ -4,8 +4,8 @@ namespace App\Livewire\Whatsapp;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Models\Template;
-use App\Models\WhatsappBusinessProfile;
+use ScriptDevelop\WhatsappManager\Models\Template;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessProfile;
 use App\Http\Controllers\WhatsappChatController;
 use App\Http\Controllers\WhatsappAPICLoudController;
 

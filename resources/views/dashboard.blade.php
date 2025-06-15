@@ -1,31 +1,31 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', 'Dashboard')
 
 @section('content_header')
-    <h1>Dashboard</h1>
+    <div class="row m-1">
+        <div class="col-12 ">
+            <h4 class="main-title">Dashboard - Whatsapp API Cloud Manager</h4>
+            <ul class="app-line-breadcrumbs mb-3">
+                <li class="">
+                    <a href="{{ route('dashboard') }}" class="f-s-14 f-w-500">
+                        <span>
+                            <i class="ph-duotone  ph-stack f-s-16"></i> Home
+                        </span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="#" class="f-s-14 f-w-500">Whatsapp API Cloud Manager</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 @stop
 
 @section('content')
     @can('create user')
         You can Create Users.
     @endcan
-
-    <x-app-layout>
-        <x-slot name="header">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
-            </h2>
-        </x-slot>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                    <x-welcome />
-                </div>
-            </div>
-        </div>
-    </x-app-layout>
 @stop
 
 @section('css')

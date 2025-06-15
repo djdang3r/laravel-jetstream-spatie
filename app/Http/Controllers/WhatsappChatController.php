@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Contact;
-use App\Models\WhatsappPhoneNumber;
-use App\Models\Message;
+use ScriptDevelop\WhatsappManager\Models\Contact;
+use ScriptDevelop\WhatsappManager\Models\WhatsappPhoneNumber;
+use ScriptDevelop\WhatsappManager\Models\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

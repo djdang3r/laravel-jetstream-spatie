@@ -13,8 +13,10 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.0",
+        "scriptdevelop/whatsapp-manager": "^1.0",
         "spatie/laravel-activitylog": "^4.9",
         "spatie/laravel-permission": "^6.9",
+        "stancl/tenancy": "^3.9",
         "yajra/laravel-datatables-oracle": "12.2"
     },
     "require-dev": {

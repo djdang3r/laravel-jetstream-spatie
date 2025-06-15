@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('whatsapp_business_profiles', function (Blueprint $table) {
-            $table->uuid('whatsapp_business_profile_id')->primary();
+            $table->ulid('whatsapp_business_profile_id')->primary();
             $table->text('profile_picture_url')->nullable();
             $table->text('about')->nullable();
             $table->string('address', 256)->nullable();

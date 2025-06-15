@@ -3,7 +3,7 @@
 namespace App\Livewire\Whatsapp;
 
 use Livewire\Component;
-use App\Models\WhatsappBusinessAccount;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessAccount;
 
 class AddBusinessAccount extends Component
 {
@@ -18,7 +18,7 @@ class AddBusinessAccount extends Component
 
     public function save()
     {
-        
+
         $this->validate();
 
         WhatsappBusinessAccount::create([

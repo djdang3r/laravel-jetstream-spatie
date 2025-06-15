@@ -3,10 +3,10 @@
 namespace App\Livewire\Whatsapp;
 
 use Livewire\Component;
-use App\Models\WhatsappPhoneNumber;
-use App\Models\WhatsappBusinessAccount;
-use App\Models\WhatsappBusinessProfile;
-use App\Models\Conversation;
+use ScriptDevelop\WhatsappManager\Models\WhatsappPhoneNumber;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessAccount;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessProfile;
+use ScriptDevelop\WhatsappManager\Models\Conversation;
 use App\Http\Controllers\WhatsappAPICLoudController;
 
 

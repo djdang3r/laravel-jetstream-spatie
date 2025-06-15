@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Contact;
-use App\Models\Message;
-use App\Models\Template;
-use App\Models\WhatsappBusinessAccount;
-use App\Models\WhatsappPhoneNumber;
-use App\Models\WhatsappBusinessProfile;
-use App\Models\Website;
+use ScriptDevelop\WhatsappManager\Models\Contact;
+use ScriptDevelop\WhatsappManager\Models\Message;
+use ScriptDevelop\WhatsappManager\Models\Template;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessAccount;
+use ScriptDevelop\WhatsappManager\Models\WhatsappPhoneNumber;
+use ScriptDevelop\WhatsappManager\Models\WhatsappBusinessProfile;
+use ScriptDevelop\WhatsappManager\Models\Website;
 
 
 class WhatsappAPICLoudController extends Controller
